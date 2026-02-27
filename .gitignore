@@ -1,0 +1,17 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+
+# test
+merkle_tree.json
+test_keys
+merkle_tree_test_csv.json
+airdrop_entries.json
+
+# Surfpool
+.surfpool/
+runbooks/
+txtx.yml

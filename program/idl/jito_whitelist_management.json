@@ -1,0 +1,215 @@
+{
+  "version": "0.1.0",
+  "name": "jito_whitelist_management",
+  "instructions": [
+    {
+      "name": "InitializeWhitelist",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "base",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "initialAdmin",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    },
+    {
+      "name": "AddAdmin",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newAdmin",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "RemoveAdmin",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminToRemove",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
+    },
+    {
+      "name": "AddToWhitelist",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signerToAdd",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
+      "name": "RemoveFromWhitelist",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signerToRemove",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 4
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Whitelist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "whitelist",
+            "type": {
+              "array": [
+                "publicKey",
+                64
+              ]
+            }
+          },
+          {
+            "name": "admins",
+            "type": {
+              "array": [
+                "publicKey",
+                8
+              ]
+            }
+          },
+          {
+            "name": "base",
+            "type": "publicKey"
+          },
+          {
+            "name": "totalStakeDeposited",
+            "type": {
+              "defined": "PodU64"
+            }
+          },
+          {
+            "name": "totalStakeWithdrawn",
+            "type": {
+              "defined": "PodU64"
+            }
+          },
+          {
+            "name": "totalWithdrawalFees",
+            "type": {
+              "defined": "PodU64"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                512
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 1000,
+      "name": "ArithmeticOverflow",
+      "msg": "ArithmeticOverflow"
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "Wh1tea995dSzf9q4bmUCPM8s6URjT1HWMrp771bLW7G"
+  }
+}

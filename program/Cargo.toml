@@ -1,0 +1,56 @@
+[package]
+name = "jito-whitelist-management-program"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "jito_whitelist_management_program"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+custom-heap = []
+custom-panic = []
+default = []
+mainnet-beta = []
+testnet = []
+devnet = []
+localhost = []
+
+[dependencies]
+borsh.workspace = true
+jito-bytemuck.workspace = true
+jito-whitelist-management-core.workspace = true
+jito-whitelist-management-sdk.workspace = true
+solana-account-info.workspace = true
+solana-address.workspace = true
+solana-cpi.workspace = true
+solana-program-entrypoint.workspace = true
+solana-program-error.workspace = true
+solana-program-log.workspace = true
+solana-pubkey.workspace = true
+solana-rent.workspace = true
+solana-system-interface.workspace = true
+solana-sysvar.workspace = true
+
+[dev-dependencies]
+jito-whitelist-management-client.workspace = true
+solana-clock.workspace = true
+solana-commitment-config.workspace = true
+solana-keypair.workspace = true
+solana-native-token.workspace = true
+solana-program-test.workspace = true
+solana-pubkey.workspace = true
+solana-transaction.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true
