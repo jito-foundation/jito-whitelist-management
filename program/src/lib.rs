@@ -11,6 +11,7 @@ mod add_to_whitelist;
 mod initialize_whitelist;
 mod remove_admin;
 mod remove_from_whitelist;
+mod set_stake_tracking;
 
 declare_id!("Wh1tea995dSzf9q4bmUCPM8s6URjT1HWMrp771bLW7G");
 
@@ -48,6 +49,20 @@ pub fn process_instruction(
         JitoWhitelistManagementInstruction::RemoveFromWhitelist => {
             log!("Instruction: RemoveFromWhitelist");
             remove_from_whitelist::process_remove_from_whitelist(program_id, accounts)
+        }
+        JitoWhitelistManagementInstruction::SetStakeTracking {
+            total_stake_deposited,
+            total_stake_withdrawn,
+            total_withdrawal_fees,
+        } => {
+            log!("Instruction: SetStakeTracking");
+            set_stake_tracking::process_set_stake_tracking(
+                program_id,
+                accounts,
+                total_stake_deposited,
+                total_stake_withdrawn,
+                total_withdrawal_fees,
+            )
         }
     }
 }

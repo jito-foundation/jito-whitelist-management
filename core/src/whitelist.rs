@@ -219,6 +219,11 @@ impl Whitelist {
     }
 
     #[inline(always)]
+    pub fn set_total_withdrawal_fees(&mut self, total_withdrawal_fees: u64) {
+        self.total_withdrawal_fees = PodU64::from(total_withdrawal_fees);
+    }
+
+    #[inline(always)]
     pub fn set_bump(&mut self, bump: u8) {
         self.bump = bump;
     }
@@ -227,6 +232,17 @@ impl Whitelist {
     pub fn check_admin(&self, admin: &Pubkey) -> Result<(), ProgramError> {
         for a in self.admins.iter() {
             if a.ne(&EMPTY_ADDRESS) && a.eq(admin) {
+                return Ok(());
+            }
+        }
+
+        Err(ProgramError::InvalidAccountData)
+    }
+
+    #[inline(always)]
+    pub fn check_whitelist_signer(&self, signer: &Pubkey) -> Result<(), ProgramError> {
+        for a in self.whitelist.iter() {
+            if a.ne(&EMPTY_ADDRESS) && a.eq(signer) {
                 return Ok(());
             }
         }

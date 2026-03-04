@@ -1,7 +1,7 @@
 use jito_bytemuck::AccountDeserialize;
 use jito_whitelist_management_client::instructions::{
     AddAdminBuilder, AddToWhitelistBuilder, InitializeWhitelistBuilder, RemoveAdminBuilder,
-    RemoveFromWhitelistBuilder,
+    RemoveFromWhitelistBuilder, SetStakeTrackingBuilder,
 };
 use jito_whitelist_management_core::whitelist::Whitelist;
 use solana_commitment_config::CommitmentLevel;
@@ -216,6 +216,34 @@ impl WhitelistManagementProgramClient {
             &[ix],
             Some(&admin.pubkey()),
             &[&admin],
+            blockhash,
+        ))
+        .await
+    }
+
+    #[allow(dead_code)]
+    pub async fn set_stake_tracking(
+        &mut self,
+        whitelist_signer: &Keypair,
+        base: Pubkey,
+        total_stake_deposited: u64,
+        total_stake_withdrawn: u64,
+        total_withdrawal_fees: u64,
+    ) -> Result<(), TestError> {
+        let whitelist_pda = self.get_whitelist_pda(&base);
+
+        let blockhash = self.banks_client.get_latest_blockhash().await?;
+        let ix = SetStakeTrackingBuilder::new()
+            .whitelist_signer(whitelist_signer.pubkey())
+            .whitelist(whitelist_pda)
+            .total_stake_deposited(total_stake_deposited)
+            .total_stake_withdrawn(total_stake_withdrawn)
+            .total_withdrawal_fees(total_withdrawal_fees)
+            .instruction();
+        self.process_transaction(&Transaction::new_signed_with_payer(
+            &[ix],
+            Some(&whitelist_signer.pubkey()),
+            &[&whitelist_signer],
             blockhash,
         ))
         .await

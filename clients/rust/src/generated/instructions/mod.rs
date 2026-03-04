@@ -10,9 +10,11 @@ pub(crate) mod r#add_to_whitelist;
 pub(crate) mod r#initialize_whitelist;
 pub(crate) mod r#remove_admin;
 pub(crate) mod r#remove_from_whitelist;
+pub(crate) mod r#set_stake_tracking;
 
 pub use self::r#add_admin::*;
 pub use self::r#add_to_whitelist::*;
 pub use self::r#initialize_whitelist::*;
 pub use self::r#remove_admin::*;
 pub use self::r#remove_from_whitelist::*;
+pub use self::r#set_stake_tracking::*;

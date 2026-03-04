@@ -136,6 +136,39 @@
         "type": "u8",
         "value": 4
       }
+    },
+    {
+      "name": "SetStakeTracking",
+      "accounts": [
+        {
+          "name": "whitelistSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "whitelist",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "totalStakeDeposited",
+          "type": "u64"
+        },
+        {
+          "name": "totalStakeWithdrawn",
+          "type": "u64"
+        },
+        {
+          "name": "totalWithdrawalFees",
+          "type": "u64"
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
     }
   ],
   "accounts": [

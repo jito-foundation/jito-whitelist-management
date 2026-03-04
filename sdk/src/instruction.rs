@@ -34,4 +34,13 @@ pub enum JitoWhitelistManagementInstruction {
     #[account(1, writable, name = "whitelist")]
     #[account(2, name = "signer_to_remove")]
     RemoveFromWhitelist,
+
+    /// Set stake tracking fields (total_stake_deposited, total_stake_withdrawn, total_withdrawal_fees)
+    #[account(0, writable, signer, name = "whitelist_signer")]
+    #[account(1, writable, name = "whitelist")]
+    SetStakeTracking {
+        total_stake_deposited: u64,
+        total_stake_withdrawn: u64,
+        total_withdrawal_fees: u64,
+    },
 }
