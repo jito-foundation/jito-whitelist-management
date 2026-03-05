@@ -43,9 +43,6 @@ mod tests {
         }
 
         assert_eq!(whitelist.base, base.pubkey());
-        assert_eq!(whitelist.total_stake_deposited(), 0);
-        assert_eq!(whitelist.total_stake_withdrawn(), 0);
-        assert_eq!(whitelist.total_withdrawal_fees(), 0);
     }
 
     #[tokio::test]

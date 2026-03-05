@@ -1,5 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
+use jito_bytemuck::{AccountDeserialize, Discriminator};
 use shank::ShankAccount;
 use solana_account_info::AccountInfo;
 use solana_program_error::ProgramError;
@@ -23,21 +23,12 @@ pub struct Whitelist {
     /// Base keypair used to derive this PDA
     pub base: Pubkey,
 
-    /// ( Optional )
-    pub total_stake_deposited: PodU64,
-
-    /// ( Optional )
-    pub total_stake_withdrawn: PodU64,
-
-    /// ( Optional )
-    pub total_withdrawal_fees: PodU64,
-
     /// Bump of the PDA
     pub bump: u8,
 
     // More tracking as nessecary ( Optional )...
     /// Reserved for future use
-    pub _padding: [u8; 512],
+    pub _padding: [u8; 536],
 }
 
 impl Default for Whitelist {
@@ -46,11 +37,8 @@ impl Default for Whitelist {
             whitelist: [EMPTY_ADDRESS; 64],
             admins: [EMPTY_ADDRESS; 8],
             base: Pubkey::default(),
-            total_stake_deposited: PodU64::from(0),
-            total_stake_withdrawn: PodU64::from(0),
-            total_withdrawal_fees: PodU64::from(0),
             bump: 0,
-            _padding: [0; 512],
+            _padding: [0; 536],
         }
     }
 }
@@ -194,31 +182,6 @@ impl Whitelist {
     }
 
     #[inline(always)]
-    pub fn total_stake_deposited(&self) -> u64 {
-        self.total_stake_deposited.into()
-    }
-
-    #[inline(always)]
-    pub fn set_total_stake_deposited(&mut self, total_stake_deposited: u64) {
-        self.total_stake_deposited = PodU64::from(total_stake_deposited);
-    }
-
-    #[inline(always)]
-    pub fn total_stake_withdrawn(&self) -> u64 {
-        self.total_stake_withdrawn.into()
-    }
-
-    #[inline(always)]
-    pub fn set_total_stake_withdrawn(&mut self, total_stake_withdrawn: u64) {
-        self.total_stake_withdrawn = PodU64::from(total_stake_withdrawn);
-    }
-
-    #[inline(always)]
-    pub fn total_withdrawal_fees(&self) -> u64 {
-        self.total_withdrawal_fees.into()
-    }
-
-    #[inline(always)]
     pub fn set_bump(&mut self, bump: u8) {
         self.bump = bump;
     }
@@ -249,9 +212,6 @@ mod tests {
         assert!(wl.whitelist.iter().all(|a| *a == EMPTY_ADDRESS));
         assert!(wl.admins.iter().all(|a| *a == EMPTY_ADDRESS));
         assert_eq!(wl.base, Pubkey::default());
-        assert_eq!(wl.total_stake_deposited, PodU64::from(0));
-        assert_eq!(wl.total_stake_withdrawn, PodU64::from(0));
-        assert_eq!(wl.total_withdrawal_fees, PodU64::from(0));
         assert_eq!(wl.bump, 0);
         assert!(wl._padding.iter().all(|&b| b == 0));
     }
@@ -449,20 +409,6 @@ mod tests {
         let mut wl = Whitelist::default();
         wl.set_bump(255);
         assert_eq!(wl.bump, 255);
-    }
-
-    #[test]
-    fn test_set_total_stake_deposited() {
-        let mut wl = Whitelist::default();
-        wl.set_total_stake_deposited(1_000_000);
-        assert_eq!(wl.total_stake_deposited, PodU64::from(1_000_000));
-    }
-
-    #[test]
-    fn test_set_receive() {
-        let mut wl = Whitelist::default();
-        wl.set_total_stake_withdrawn(500_000);
-        assert_eq!(wl.total_stake_withdrawn, PodU64::from(500_000));
     }
 
     #[test]
