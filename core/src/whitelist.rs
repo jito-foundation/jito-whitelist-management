@@ -2,6 +2,7 @@ use bytemuck::{Pod, Zeroable};
 use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
 use shank::ShankAccount;
 use solana_account_info::AccountInfo;
+use jito_whitelist_management_sdk::error::WhitelistManagementError;
 use solana_program_error::ProgramError;
 use solana_program_log::log;
 use solana_pubkey::Pubkey;
@@ -156,7 +157,7 @@ impl Whitelist {
         admin_to_remove: &Pubkey,
     ) -> Result<(), ProgramError> {
         if admin == admin_to_remove {
-            return Err(ProgramError::InvalidAccountData);
+            return Err(WhitelistManagementError::AdminSelfRemoval.into());
         }
 
         for a in self.admins.iter_mut() {
