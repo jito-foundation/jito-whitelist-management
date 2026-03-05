@@ -5,10 +5,9 @@ use shank::ShankInstruction;
 pub enum JitoWhitelistManagementInstruction {
     /// Initializes the global configuration
     #[account(0, writable, signer, name = "payer")]
-    #[account(1, writable, signer, name = "base")]
-    #[account(2, writable, name = "whitelist")]
-    #[account(3, name = "initial_admin")]
-    #[account(4, name = "system_program")]
+    #[account(1, writable, name = "whitelist")]
+    #[account(2, name = "initial_admin")]
+    #[account(3, name = "system_program")]
     InitializeWhitelist,
 
     /// Add admin

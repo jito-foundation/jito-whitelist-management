@@ -23,7 +23,7 @@ pub fn process_add_admin(program_id: &Pubkey, accounts: &[AccountInfo]) -> Progr
     {
         let whitelist_data = whitelist_info.data.borrow();
         let whitelist = Whitelist::try_from_slice_unchecked(&whitelist_data)?;
-        Whitelist::load(program_id, whitelist_info, &whitelist.base, true)?;
+        Whitelist::load(program_id, whitelist_info, true)?;
         whitelist.check_admin(admin_info.key)?;
     }
 

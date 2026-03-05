@@ -15,11 +15,6 @@ pub struct Whitelist {
     #[cfg_attr(feature = "serde", serde(with = "serde_big_array::BigArray"))]
     pub whitelist: [Pubkey; 64],
     pub admins: [Pubkey; 8],
-    #[cfg_attr(
-        feature = "serde",
-        serde(with = "serde_with::As::<serde_with::DisplayFromStr>")
-    )]
-    pub base: Pubkey,
     pub total_stake_deposited: u64,
     pub total_stake_withdrawn: u64,
     pub total_withdrawal_fees: u64,

@@ -17,15 +17,13 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
         let whitelist = whitelist_management_program_client
-            .get_whitelist(&base.pubkey())
+            .get_whitelist()
             .await
             .unwrap();
 
@@ -42,7 +40,6 @@ mod tests {
             assert_eq!(*admin, EMPTY_ADDRESS);
         }
 
-        assert_eq!(whitelist.base, base.pubkey());
         assert_eq!(whitelist.total_stake_deposited(), 0);
         assert_eq!(whitelist.total_stake_withdrawn(), 0);
         assert_eq!(whitelist.total_withdrawal_fees(), 0);
@@ -56,17 +53,15 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
         fixture.warp_slot_incremental(1).await.unwrap();
 
         let transaction_error = whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await;
 
         assert_ix_error(transaction_error, InstructionError::InvalidAccountOwner);
@@ -77,13 +72,11 @@ mod tests {
         let fixture = TestBuilder::new().await;
         let mut whitelist_management_program_client = fixture.whitelist_management_program_client();
 
-        let base = Keypair::new();
-
         let bad_whitelist = Pubkey::new_unique();
         let initial_admin = Pubkey::new_unique();
 
         let transaction_error = whitelist_management_program_client
-            .initialize_whitelist(&base, bad_whitelist, initial_admin)
+            .initialize_whitelist(bad_whitelist, initial_admin)
             .await;
 
         assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
