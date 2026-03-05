@@ -73,7 +73,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_initialize_config_bad_pda_fails() {
+    async fn test_initialize_whitelist_bad_pda_fails() {
         let fixture = TestBuilder::new().await;
         let mut whitelist_management_program_client = fixture.whitelist_management_program_client();
 

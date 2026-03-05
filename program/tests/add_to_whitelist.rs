@@ -2,6 +2,7 @@ mod fixtures;
 
 #[cfg(test)]
 mod tests {
+    use jito_whitelist_management_client::errors::JitoWhitelistManagementError;
     use solana_keypair::{Keypair, Signer};
     use solana_transaction::InstructionError;
 
@@ -64,6 +65,9 @@ mod tests {
             .do_add_to_whitelist(&bad_admin, &base, new_admin.pubkey())
             .await;
 
-        assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
+        assert_ix_error(
+            transaction_error,
+            InstructionError::Custom(JitoWhitelistManagementError::InvalidAdmin as u32),
+        );
     }
 }
