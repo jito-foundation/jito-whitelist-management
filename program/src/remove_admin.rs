@@ -25,6 +25,7 @@ pub fn process_remove_admin(program_id: &Pubkey, accounts: &[AccountInfo]) -> Pr
         let whitelist = Whitelist::try_from_slice_unchecked(&whitelist_data)?;
         Whitelist::load(program_id, whitelist_info, &whitelist.base, true)?;
         whitelist.check_admin(admin_info.key)?;
+        whitelist.check_admin(admin_to_remove_info.key)?;
     }
 
     let mut whitelist_data = whitelist_info.data.borrow_mut();
