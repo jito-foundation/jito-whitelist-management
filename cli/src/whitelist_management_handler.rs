@@ -1,11 +1,9 @@
-use borsh::BorshDeserialize;
-use jito_whitelist_management_client::{
-    accounts::Whitelist,
-    instructions::{
-        AddAdminBuilder, AddToWhitelistBuilder, InitializeWhitelistBuilder, RemoveAdminBuilder,
-        RemoveFromWhitelistBuilder,
-    },
+use jito_bytemuck::AccountDeserialize;
+use jito_whitelist_management_client::instructions::{
+    AddAdminBuilder, AddToWhitelistBuilder, InitializeWhitelistBuilder, RemoveAdminBuilder,
+    RemoveFromWhitelistBuilder,
 };
+use jito_whitelist_management_core::whitelist::Whitelist;
 use solana_pubkey::Pubkey;
 use solana_rpc_client::nonblocking::rpc_client::RpcClient;
 use solana_signer::{signers::Signers, Signer};
@@ -87,7 +85,22 @@ impl WhitelistManagementCliHandler {
             ))
             .await?;
 
-        println!("{}", serde_json::to_string_pretty(&account)?);
+        println!("Whitelist Account: {}", jito_whitelist_management_address);
+        println!("Bump: {}", account.bump);
+
+        println!("\nAdmins:");
+        for (i, admin) in account.admins.iter().enumerate() {
+            if !Whitelist::is_empty_address(admin) {
+                println!("  [{}] {}", i, admin);
+            }
+        }
+
+        println!("\nWhitelisted Signers:");
+        for (i, signer) in account.whitelist.iter().enumerate() {
+            if !Whitelist::is_empty_address(signer) {
+                println!("  [{}] {}", i, signer);
+            }
+        }
 
         Ok(())
     }
@@ -250,13 +263,16 @@ impl WhitelistManagementCliHandler {
     ///
     /// This method retrieves account data using the configured RPC client,
     /// then deserializes it into the specified account type using Borsh deserialization.
-    async fn get_account<T: BorshDeserialize>(&self, account_pubkey: &Pubkey) -> anyhow::Result<T> {
+    async fn get_account<T: AccountDeserialize>(
+        &self,
+        account_pubkey: &Pubkey,
+    ) -> anyhow::Result<T> {
         let rpc_client = self.get_rpc_client();
 
         let account = rpc_client.get_account(account_pubkey).await?;
-        let account = T::deserialize(&mut account.data.as_slice())?;
+        let account = T::try_from_slice_unchecked(&account.data)?;
 
-        Ok(account)
+        Ok(*account)
     }
 
     // fn convert_instruction(
