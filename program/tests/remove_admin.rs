@@ -2,6 +2,7 @@ mod fixtures;
 
 #[cfg(test)]
 mod tests {
+    use jito_whitelist_management_client::errors::JitoWhitelistManagementError;
     use jito_whitelist_management_core::whitelist::EMPTY_ADDRESS;
     use solana_keypair::{Keypair, Signer};
     use solana_transaction::InstructionError;
@@ -66,7 +67,10 @@ mod tests {
             .do_remove_admin(&bad_admin, new_admin.pubkey())
             .await;
 
-        assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
+        assert_ix_error(
+            transaction_error,
+            InstructionError::Custom(JitoWhitelistManagementError::InvalidAdmin as u32),
+        );
     }
 
     #[tokio::test]
@@ -89,6 +93,9 @@ mod tests {
             .do_remove_admin(&admin, admin.pubkey())
             .await;
 
-        assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
+        assert_ix_error(
+            transaction_error,
+            InstructionError::Custom(JitoWhitelistManagementError::AdminSelfRemoval as u32),
+        );
     }
 }
