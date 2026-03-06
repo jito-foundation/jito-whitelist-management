@@ -158,24 +158,6 @@
             }
           },
           {
-            "name": "totalStakeDeposited",
-            "type": {
-              "defined": "PodU64"
-            }
-          },
-          {
-            "name": "totalStakeWithdrawn",
-            "type": {
-              "defined": "PodU64"
-            }
-          },
-          {
-            "name": "totalWithdrawalFees",
-            "type": {
-              "defined": "PodU64"
-            }
-          },
-          {
             "name": "bump",
             "type": "u8"
           },
@@ -184,7 +166,7 @@
             "type": {
               "array": [
                 "u8",
-                512
+                536
               ]
             }
           }
