@@ -142,12 +142,11 @@ impl Whitelist {
 
     #[inline(always)]
     pub fn add_admin(&mut self, admin: Pubkey) -> Result<(), ProgramError> {
-        for a in self.admins.iter() {
+        for a in self.admins.iter_mut() {
             if *a == admin {
                 return Err(WhitelistManagementError::DuplicateEntry.into());
             }
-        }
-        for a in self.admins.iter_mut() {
+
             if *a == EMPTY_ADDRESS {
                 *a = admin;
                 return Ok(());
@@ -177,12 +176,11 @@ impl Whitelist {
 
     #[inline(always)]
     pub fn add_to_whitelist(&mut self, signer_to_add: Pubkey) -> Result<(), ProgramError> {
-        for a in self.whitelist.iter() {
+        for a in self.whitelist.iter_mut() {
             if *a == signer_to_add {
                 return Err(WhitelistManagementError::DuplicateEntry.into());
             }
-        }
-        for a in self.whitelist.iter_mut() {
+
             if *a == EMPTY_ADDRESS {
                 *a = signer_to_add;
                 return Ok(());
