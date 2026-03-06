@@ -179,6 +179,11 @@
       "code": 1000,
       "name": "ArithmeticOverflow",
       "msg": "ArithmeticOverflow"
+    },
+    {
+      "code": 1001,
+      "name": "DuplicateEntry",
+      "msg": "DuplicateEntry"
     }
   ],
   "metadata": {
