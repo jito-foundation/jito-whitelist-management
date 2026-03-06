@@ -13,9 +13,15 @@ pub enum JitoWhitelistManagementError {
     /// 1000 - ArithmeticOverflow
     #[error("ArithmeticOverflow")]
     ArithmeticOverflow = 0x3E8,
-    /// 1001 - ListFull
+    /// 1001 - InvalidAdmin
+    #[error("InvalidAdmin")]
+    InvalidAdmin = 0x3E9,
+    /// 1002 - AdminSelfRemoval
+    #[error("AdminSelfRemoval")]
+    AdminSelfRemoval = 0x3EA,
+    /// 1003 - ListFull
     #[error("ListFull")]
-    ListFull = 0x3E9,
+    ListFull = 0x3EB,
 }
 
 impl From<JitoWhitelistManagementError> for solana_program_error::ProgramError {
