@@ -158,10 +158,6 @@
             }
           },
           {
-            "name": "base",
-            "type": "publicKey"
-          },
-          {
             "name": "bump",
             "type": "u8"
           },
