@@ -6,8 +6,14 @@ pub enum WhitelistManagementError {
     #[error("ArithmeticOverflow")]
     ArithmeticOverflow = 1000,
 
+    #[error("InvalidAdmin")]
+    InvalidAdmin = 1001,
+
+    #[error("AdminSelfRemoval")]
+    AdminSelfRemoval = 1002,
+
     #[error("ListFull")]
-    ListFull = 1001,
+    ListFull = 1003,
 }
 
 impl From<WhitelistManagementError> for ProgramError {
