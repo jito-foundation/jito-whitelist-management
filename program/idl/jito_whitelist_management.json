@@ -189,6 +189,11 @@
       "code": 1002,
       "name": "AdminSelfRemoval",
       "msg": "AdminSelfRemoval"
+    },
+    {
+      "code": 1003,
+      "name": "ListFull",
+      "msg": "ListFull"
     }
   ],
   "metadata": {

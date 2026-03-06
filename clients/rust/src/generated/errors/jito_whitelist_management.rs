@@ -19,6 +19,9 @@ pub enum JitoWhitelistManagementError {
     /// 1002 - AdminSelfRemoval
     #[error("AdminSelfRemoval")]
     AdminSelfRemoval = 0x3EA,
+    /// 1003 - ListFull
+    #[error("ListFull")]
+    ListFull = 0x3EB,
 }
 
 impl From<JitoWhitelistManagementError> for solana_program_error::ProgramError {

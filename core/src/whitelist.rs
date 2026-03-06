@@ -121,13 +121,14 @@ impl Whitelist {
     }
 
     #[inline(always)]
-    pub fn add_admin(&mut self, admin: Pubkey) {
+    pub fn add_admin(&mut self, admin: Pubkey) -> Result<(), ProgramError> {
         for a in self.admins.iter_mut() {
             if *a == EMPTY_ADDRESS {
                 *a = admin;
-                break;
+                return Ok(());
             }
         }
+        Err(WhitelistManagementError::ListFull.into())
     }
 
     #[inline(always)]
@@ -150,13 +151,14 @@ impl Whitelist {
     }
 
     #[inline(always)]
-    pub fn add_to_whitelist(&mut self, signer_to_add: Pubkey) {
+    pub fn add_to_whitelist(&mut self, signer_to_add: Pubkey) -> Result<(), ProgramError> {
         for a in self.whitelist.iter_mut() {
             if *a == EMPTY_ADDRESS {
                 *a = signer_to_add;
-                break;
+                return Ok(());
             }
         }
+        Err(WhitelistManagementError::ListFull.into())
     }
 
     #[inline(always)]
@@ -214,7 +216,7 @@ mod tests {
     #[test]
     fn test_add_admin() {
         let mut wl = Whitelist::default();
-        wl.add_admin(make_address(1));
+        wl.add_admin(make_address(1)).unwrap();
         assert_eq!(wl.admins[0], make_address(1));
         assert!(wl.admins[1..].iter().all(|a| *a == EMPTY_ADDRESS));
     }
@@ -223,7 +225,7 @@ mod tests {
     fn test_add_multiple_admins() {
         let mut wl = Whitelist::default();
         for i in 1..=8 {
-            wl.add_admin(make_address(i));
+            wl.add_admin(make_address(i)).unwrap();
         }
         for i in 0..8 {
             assert_eq!(wl.admins[i], make_address(i as u8 + 1));
@@ -231,20 +233,20 @@ mod tests {
     }
 
     #[test]
-    fn test_add_admin_when_full_does_not_panic() {
+    fn test_add_admin_when_full_returns_error() {
         let mut wl = Whitelist::default();
         for i in 1..=8 {
-            wl.add_admin(make_address(i));
+            wl.add_admin(make_address(i)).unwrap();
         }
-        // 9th add should silently do nothing
-        wl.add_admin(make_address(99));
+        // 9th add should return an error
+        assert!(wl.add_admin(make_address(99)).is_err());
         assert!(wl.admins.iter().all(|a| *a != make_address(99)));
     }
 
     #[test]
     fn test_check_admin_found() {
         let mut wl = Whitelist::default();
-        wl.add_admin(make_address(5));
+        wl.add_admin(make_address(5)).unwrap();
         assert!(wl.check_admin(&make_address(5)).is_ok());
     }
 
@@ -264,8 +266,8 @@ mod tests {
     #[test]
     fn test_remove_admin() {
         let mut wl = Whitelist::default();
-        wl.add_admin(make_address(1));
-        wl.add_admin(make_address(2));
+        wl.add_admin(make_address(1)).unwrap();
+        wl.add_admin(make_address(2)).unwrap();
         assert!(wl.check_admin(&make_address(1)).is_ok());
 
         wl.remove_admin(&make_address(2), &make_address(1)).unwrap();
@@ -276,7 +278,7 @@ mod tests {
     #[test]
     fn test_remove_admin_self_removal_fails() {
         let mut wl = Whitelist::default();
-        wl.add_admin(make_address(1));
+        wl.add_admin(make_address(1)).unwrap();
         // Admin cannot remove themselves
         assert!(wl.remove_admin(&make_address(1), &make_address(1)).is_err());
         // Admin should still be present
@@ -286,7 +288,7 @@ mod tests {
     #[test]
     fn test_remove_admin_not_present() {
         let mut wl = Whitelist::default();
-        wl.add_admin(make_address(1));
+        wl.add_admin(make_address(1)).unwrap();
         // Removing a non-existent admin should not affect existing ones
         wl.remove_admin(&make_address(1), &make_address(99))
             .unwrap();
@@ -320,7 +322,7 @@ mod tests {
     #[test]
     fn test_add_to_whitelist() {
         let mut wl = Whitelist::default();
-        wl.add_to_whitelist(make_address(1));
+        wl.add_to_whitelist(make_address(1)).unwrap();
         assert_eq!(wl.whitelist[0], make_address(1));
         assert!(wl.whitelist[1..].iter().all(|a| *a == EMPTY_ADDRESS));
     }
@@ -329,7 +331,7 @@ mod tests {
     fn test_add_multiple_to_whitelist() {
         let mut wl = Whitelist::default();
         for i in 1..=64 {
-            wl.add_to_whitelist(make_address(i));
+            wl.add_to_whitelist(make_address(i)).unwrap();
         }
         for i in 0..64 {
             assert_eq!(wl.whitelist[i], make_address(i as u8 + 1));
@@ -337,20 +339,20 @@ mod tests {
     }
 
     #[test]
-    fn test_add_to_whitelist_when_full_does_not_panic() {
+    fn test_add_to_whitelist_when_full_returns_error() {
         let mut wl = Whitelist::default();
         for i in 1..=64 {
-            wl.add_to_whitelist(make_address(i));
+            wl.add_to_whitelist(make_address(i)).unwrap();
         }
-        // 65th add should silently do nothing
-        wl.add_to_whitelist(make_address(200));
+        // 65th add should return an error
+        assert!(wl.add_to_whitelist(make_address(200)).is_err());
         assert!(wl.whitelist.iter().all(|a| *a != make_address(200)));
     }
 
     #[test]
     fn test_remove_from_whitelist() {
         let mut wl = Whitelist::default();
-        wl.add_to_whitelist(make_address(1));
+        wl.add_to_whitelist(make_address(1)).unwrap();
         wl.remove_from_whitelist(make_address(1));
         assert_eq!(wl.whitelist[0], EMPTY_ADDRESS);
     }
@@ -358,7 +360,7 @@ mod tests {
     #[test]
     fn test_remove_from_whitelist_not_present() {
         let mut wl = Whitelist::default();
-        wl.add_to_whitelist(make_address(1));
+        wl.add_to_whitelist(make_address(1)).unwrap();
         wl.remove_from_whitelist(make_address(99));
         assert_eq!(wl.whitelist[0], make_address(1));
     }
@@ -416,11 +418,11 @@ mod tests {
     #[test]
     fn test_add_admin_reuses_removed_slot() {
         let mut wl = Whitelist::default();
-        wl.add_admin(make_address(1));
-        wl.add_admin(make_address(2));
+        wl.add_admin(make_address(1)).unwrap();
+        wl.add_admin(make_address(2)).unwrap();
         wl.remove_admin(&make_address(2), &make_address(1)).unwrap();
         // Adding a new admin should fill the first empty slot (index 0)
-        wl.add_admin(make_address(3));
+        wl.add_admin(make_address(3)).unwrap();
         assert_eq!(wl.admins[0], make_address(3));
         assert_eq!(wl.admins[1], make_address(2));
     }
@@ -428,10 +430,10 @@ mod tests {
     #[test]
     fn test_add_to_whitelist_reuses_removed_slot() {
         let mut wl = Whitelist::default();
-        wl.add_to_whitelist(make_address(1));
-        wl.add_to_whitelist(make_address(2));
+        wl.add_to_whitelist(make_address(1)).unwrap();
+        wl.add_to_whitelist(make_address(2)).unwrap();
         wl.remove_from_whitelist(make_address(1));
-        wl.add_to_whitelist(make_address(3));
+        wl.add_to_whitelist(make_address(3)).unwrap();
         assert_eq!(wl.whitelist[0], make_address(3));
         assert_eq!(wl.whitelist[1], make_address(2));
     }

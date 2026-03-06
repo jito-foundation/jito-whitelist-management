@@ -11,6 +11,9 @@ pub enum WhitelistManagementError {
 
     #[error("AdminSelfRemoval")]
     AdminSelfRemoval = 1002,
+
+    #[error("ListFull")]
+    ListFull = 1003,
 }
 
 impl From<WhitelistManagementError> for ProgramError {
