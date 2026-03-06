@@ -22,18 +22,10 @@ pub enum WhitelistManagementCommands {
 #[derive(Subcommand)]
 pub enum WhitelistManagementActions {
     /// Get the whitelist
-    Get {
-        /// Base
-        #[arg(long)]
-        base: Pubkey,
-    },
+    Get,
 
     /// Initialize the whitelist
     Initialize {
-        /// Base keypair used to derive the whitelist PDA
-        #[arg(long)]
-        base: String,
-
         /// Initial Admin
         #[arg(long)]
         initial_admin: Pubkey,
@@ -41,10 +33,6 @@ pub enum WhitelistManagementActions {
 
     /// Add Admin
     AddAdmin {
-        /// Base keypair used to derive the whitelist PDA
-        #[arg(long)]
-        base: Pubkey,
-
         /// New Admin
         #[arg(long)]
         new_admin: Pubkey,
@@ -52,10 +40,6 @@ pub enum WhitelistManagementActions {
 
     /// Remove Admin
     RemoveAdmin {
-        /// Base keypair used to derive the whitelist PDA
-        #[arg(long)]
-        base: Pubkey,
-
         /// Admin To Remove
         #[arg(long)]
         admin_to_remove: Pubkey,
@@ -63,10 +47,6 @@ pub enum WhitelistManagementActions {
 
     /// Add To Whitelist
     AddToWhitelist {
-        /// Base keypair used to derive the whitelist PDA
-        #[arg(long)]
-        base: Pubkey,
-
         /// Signer To Add
         #[arg(long)]
         signer_to_add: Pubkey,
@@ -74,10 +54,6 @@ pub enum WhitelistManagementActions {
 
     /// Remove From Whitelist
     RemoveFromWhitelist {
-        /// Base keypair used to derive the whitelist PDA
-        #[arg(long)]
-        base: Pubkey,
-
         /// Signer To Remove
         #[arg(long)]
         signer_to_remove: Pubkey,

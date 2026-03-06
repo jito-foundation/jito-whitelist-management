@@ -16,10 +16,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -27,17 +25,17 @@ mod tests {
         fixture.transfer(&new_admin.pubkey(), 1.0).await.unwrap();
 
         whitelist_management_program_client
-            .do_add_admin(&admin, &base, new_admin.pubkey())
+            .do_add_admin(&admin, new_admin.pubkey())
             .await
             .unwrap();
 
         whitelist_management_program_client
-            .do_remove_admin(&admin, &base, new_admin.pubkey())
+            .do_remove_admin(&admin, new_admin.pubkey())
             .await
             .unwrap();
 
         let whitelist = whitelist_management_program_client
-            .get_whitelist(&base.pubkey())
+            .get_whitelist()
             .await
             .unwrap();
 
@@ -53,10 +51,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -67,7 +63,7 @@ mod tests {
         fixture.transfer(&new_admin.pubkey(), 1.0).await.unwrap();
 
         let transaction_error = whitelist_management_program_client
-            .do_remove_admin(&bad_admin, &base, new_admin.pubkey())
+            .do_remove_admin(&bad_admin, new_admin.pubkey())
             .await;
 
         assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
@@ -81,10 +77,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -92,7 +86,7 @@ mod tests {
         fixture.transfer(&new_admin.pubkey(), 1.0).await.unwrap();
 
         let transaction_error = whitelist_management_program_client
-            .do_remove_admin(&admin, &base, admin.pubkey())
+            .do_remove_admin(&admin, admin.pubkey())
             .await;
 
         assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
