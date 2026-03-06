@@ -8,6 +8,9 @@ pub enum WhitelistManagementError {
 
     #[error("InvalidAdmin")]
     InvalidAdmin = 1001,
+
+    #[error("AdminSelfRemoval")]
+    AdminSelfRemoval = 1002,
 }
 
 impl From<WhitelistManagementError> for ProgramError {
