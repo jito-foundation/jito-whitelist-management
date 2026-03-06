@@ -13,8 +13,7 @@ pub fn process_initialize_whitelist(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
 ) -> ProgramResult {
-    let [payer_info, base_info, whitelist_info, initial_admin_info, system_program_info] = accounts
-    else {
+    let [payer_info, whitelist_info, initial_admin_info, system_program_info] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -26,11 +25,6 @@ pub fn process_initialize_whitelist(
     if !payer_info.is_writable {
         log("Payer is not writable");
         return Err(ProgramError::InvalidAccountData);
-    }
-
-    if !base_info.is_signer {
-        log("Base is not a signer");
-        return Err(ProgramError::MissingRequiredSignature);
     }
 
     if whitelist_info
@@ -59,17 +53,9 @@ pub fn process_initialize_whitelist(
         return Err(ProgramError::IncorrectProgramId);
     }
 
-    let (whitelist_pubkey, whitelist_bump, mut whitelist_seeds) =
-        Whitelist::find_program_address(program_id, base_info.key);
-    whitelist_seeds.push(vec![whitelist_bump]);
-    if whitelist_info.key.ne(&whitelist_pubkey) {
-        log("Whitelist account is not at the correct PDA");
-        return Err(ProgramError::InvalidAccountData);
-    }
-
     log("Initializing whitelist");
     let (whitelist_pubkey, whitelist_bump, mut whitelist_seeds) =
-        Whitelist::find_program_address(program_id, base_info.key);
+        Whitelist::find_program_address(program_id);
     whitelist_seeds.push(vec![whitelist_bump]);
     if whitelist_info.key.ne(&whitelist_pubkey) {
         log!("Whitelist account is not at the correct PDA");
@@ -108,7 +94,6 @@ pub fn process_initialize_whitelist(
     whitelist_acc.set_admins([EMPTY_ADDRESS; 8]);
     whitelist_acc.admins[0] = *initial_admin_info.key;
     whitelist_acc.set_whitelist([EMPTY_ADDRESS; 64]);
-    whitelist_acc.set_base(*base_info.key);
     whitelist_acc.set_bump(whitelist_bump);
 
     Ok(())

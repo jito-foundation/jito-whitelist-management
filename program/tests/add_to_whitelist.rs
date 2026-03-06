@@ -16,10 +16,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -27,12 +25,12 @@ mod tests {
         fixture.transfer(&new_signer.pubkey(), 1.0).await.unwrap();
 
         whitelist_management_program_client
-            .do_add_to_whitelist(&admin, &base, new_signer.pubkey())
+            .do_add_to_whitelist(&admin, new_signer.pubkey())
             .await
             .unwrap();
 
         let whitelist = whitelist_management_program_client
-            .get_whitelist(&base.pubkey())
+            .get_whitelist()
             .await
             .unwrap();
 
@@ -48,10 +46,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -62,7 +58,7 @@ mod tests {
         fixture.transfer(&new_admin.pubkey(), 1.0).await.unwrap();
 
         let transaction_error = whitelist_management_program_client
-            .do_add_to_whitelist(&bad_admin, &base, new_admin.pubkey())
+            .do_add_to_whitelist(&bad_admin, new_admin.pubkey())
             .await;
 
         assert_ix_error(
