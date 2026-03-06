@@ -15,10 +15,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -26,21 +24,17 @@ mod tests {
         fixture.transfer(&new_admin.pubkey(), 1.0).await.unwrap();
 
         whitelist_management_program_client
-            .do_add_admin(&admin, &base, new_admin.pubkey())
+            .do_add_admin(&admin, new_admin.pubkey())
             .await
             .unwrap();
 
         let whitelist = whitelist_management_program_client
-            .get_whitelist(&base.pubkey())
+            .get_whitelist()
             .await
             .unwrap();
 
         assert_eq!(whitelist.whitelist.len(), 64);
         assert_eq!(whitelist.admins.len(), 8);
-        assert_eq!(whitelist.base, base.pubkey());
-        assert_eq!(whitelist.total_stake_deposited(), 0);
-        assert_eq!(whitelist.total_stake_withdrawn(), 0);
-        assert_eq!(whitelist.total_withdrawal_fees(), 0);
 
         assert_eq!(whitelist.admins[0], admin.pubkey());
         assert_eq!(whitelist.admins[1], new_admin.pubkey());
@@ -54,10 +48,8 @@ mod tests {
         let admin = Keypair::new();
         fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
 
-        let base = Keypair::new();
-
         whitelist_management_program_client
-            .do_initialize_whitelist(&base, admin.pubkey())
+            .do_initialize_whitelist(admin.pubkey())
             .await
             .unwrap();
 
@@ -68,7 +60,7 @@ mod tests {
         fixture.transfer(&new_admin.pubkey(), 1.0).await.unwrap();
 
         let transaction_error = whitelist_management_program_client
-            .do_add_admin(&bad_admin, &base, new_admin.pubkey())
+            .do_add_admin(&bad_admin, new_admin.pubkey())
             .await;
 
         assert_ix_error(transaction_error, InstructionError::InvalidAccountData);

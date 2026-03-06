@@ -1,6 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use jito_bytemuck::{types::PodU64, AccountDeserialize, Discriminator};
-use jito_whitelist_management_sdk::error::WhitelistManagementError;
+use jito_bytemuck::{AccountDeserialize, Discriminator};
 use shank::ShankAccount;
 use solana_account_info::AccountInfo;
 use solana_program_error::ProgramError;
@@ -21,24 +20,12 @@ pub struct Whitelist {
     /// Empty slots are represented by EMPTY_ADDRESS (all zeros)
     pub admins: [Pubkey; 8],
 
-    /// Base keypair used to derive this PDA
-    pub base: Pubkey,
-
-    /// ( Optional )
-    pub total_stake_deposited: PodU64,
-
-    /// ( Optional )
-    pub total_stake_withdrawn: PodU64,
-
-    /// ( Optional )
-    pub total_withdrawal_fees: PodU64,
-
     /// Bump of the PDA
     pub bump: u8,
 
     // More tracking as nessecary ( Optional )...
     /// Reserved for future use
-    pub _padding: [u8; 512],
+    pub _padding: [u8; 536],
 }
 
 impl Default for Whitelist {
@@ -46,12 +33,8 @@ impl Default for Whitelist {
         Self {
             whitelist: [EMPTY_ADDRESS; 64],
             admins: [EMPTY_ADDRESS; 8],
-            base: Pubkey::default(),
-            total_stake_deposited: PodU64::from(0),
-            total_stake_withdrawn: PodU64::from(0),
-            total_withdrawal_fees: PodU64::from(0),
             bump: 0,
-            _padding: [0; 512],
+            _padding: [0; 536],
         }
     }
 }
@@ -61,8 +44,8 @@ impl Whitelist {
 
     /// Returns the seeds for the PDA
     #[inline(always)]
-    pub fn seeds(base: &Pubkey) -> Vec<Vec<u8>> {
-        vec![b"whitelist".to_vec(), base.to_bytes().to_vec()]
+    pub fn seeds() -> Vec<Vec<u8>> {
+        vec![b"whitelist".to_vec()]
     }
 
     /// Find the program address for the global configuration account
@@ -74,15 +57,15 @@ impl Whitelist {
     /// * `u8` - The bump seed
     /// * `Vec<Vec<u8>>` - The seeds used to generate the PDA
     #[inline(always)]
-    pub fn find_program_address(program_id: &Pubkey, base: &Pubkey) -> (Pubkey, u8, Vec<Vec<u8>>) {
-        let seeds = Self::seeds(base);
+    pub fn find_program_address(program_id: &Pubkey) -> (Pubkey, u8, Vec<Vec<u8>>) {
+        let seeds = Self::seeds();
         let seeds_iter: Vec<_> = seeds.iter().map(|s| s.as_slice()).collect();
         let (pda, bump) = Pubkey::find_program_address(&seeds_iter, program_id);
 
         (pda, bump, seeds)
     }
 
-    /// Attempts to load the account as [`Config`], returning an error if it's not valid.
+    /// Attempts to load the account as [`Whitelist`], returning an error if it's not valid.
     ///
     /// # Arguments
     /// * `program_id` - The program ID
@@ -95,30 +78,26 @@ impl Whitelist {
     pub fn load(
         program_id: &Pubkey,
         account: &AccountInfo,
-        base: &Pubkey,
         expect_writable: bool,
     ) -> Result<(), ProgramError> {
         if account.owner.ne(program_id) {
-            log!("Config account has an invalid owner");
+            log!("Whitelist account has an invalid owner");
             return Err(ProgramError::InvalidAccountOwner);
         }
         if account.data_is_empty() {
-            log!("Config account data is empty");
+            log!("Whitelist account data is empty");
             return Err(ProgramError::InvalidAccountData);
         }
         if expect_writable && !account.is_writable {
-            log!("Config account is not writable");
+            log!("Whitelist account is not writable");
             return Err(ProgramError::InvalidAccountData);
         }
         if account.data.borrow()[0].ne(&Self::DISCRIMINATOR) {
-            log!("Config account discriminator is invalid");
+            log!("Whitelist account discriminator is invalid");
             return Err(ProgramError::InvalidAccountData);
         }
-        if account
-            .key
-            .ne(&Self::find_program_address(program_id, base).0)
-        {
-            log!("Config account is not at the correct PDA");
+        if account.key.ne(&Self::find_program_address(program_id).0) {
+            log!("Whitelist account is not at the correct PDA");
             return Err(ProgramError::InvalidAccountData);
         }
         Ok(())
@@ -200,36 +179,6 @@ impl Whitelist {
     }
 
     #[inline(always)]
-    pub fn set_base(&mut self, base: Pubkey) {
-        self.base = base;
-    }
-
-    #[inline(always)]
-    pub fn total_stake_deposited(&self) -> u64 {
-        self.total_stake_deposited.into()
-    }
-
-    #[inline(always)]
-    pub fn set_total_stake_deposited(&mut self, total_stake_deposited: u64) {
-        self.total_stake_deposited = PodU64::from(total_stake_deposited);
-    }
-
-    #[inline(always)]
-    pub fn total_stake_withdrawn(&self) -> u64 {
-        self.total_stake_withdrawn.into()
-    }
-
-    #[inline(always)]
-    pub fn set_total_stake_withdrawn(&mut self, total_stake_withdrawn: u64) {
-        self.total_stake_withdrawn = PodU64::from(total_stake_withdrawn);
-    }
-
-    #[inline(always)]
-    pub fn total_withdrawal_fees(&self) -> u64 {
-        self.total_withdrawal_fees.into()
-    }
-
-    #[inline(always)]
     pub fn set_bump(&mut self, bump: u8) {
         self.bump = bump;
     }
@@ -259,10 +208,6 @@ mod tests {
         let wl = Whitelist::default();
         assert!(wl.whitelist.iter().all(|a| *a == EMPTY_ADDRESS));
         assert!(wl.admins.iter().all(|a| *a == EMPTY_ADDRESS));
-        assert_eq!(wl.base, Pubkey::default());
-        assert_eq!(wl.total_stake_deposited, PodU64::from(0));
-        assert_eq!(wl.total_stake_withdrawn, PodU64::from(0));
-        assert_eq!(wl.total_withdrawal_fees, PodU64::from(0));
         assert_eq!(wl.bump, 0);
         assert!(wl._padding.iter().all(|&b| b == 0));
     }
@@ -449,13 +394,6 @@ mod tests {
     }
 
     #[test]
-    fn test_set_base() {
-        let mut wl = Whitelist::default();
-        wl.set_base(make_address(42));
-        assert_eq!(wl.base, make_address(42));
-    }
-
-    #[test]
     fn test_set_bump() {
         let mut wl = Whitelist::default();
         wl.set_bump(255);
@@ -463,45 +401,20 @@ mod tests {
     }
 
     #[test]
-    fn test_set_total_stake_deposited() {
-        let mut wl = Whitelist::default();
-        wl.set_total_stake_deposited(1_000_000);
-        assert_eq!(wl.total_stake_deposited, PodU64::from(1_000_000));
-    }
-
-    #[test]
-    fn test_set_receive() {
-        let mut wl = Whitelist::default();
-        wl.set_total_stake_withdrawn(500_000);
-        assert_eq!(wl.total_stake_withdrawn, PodU64::from(500_000));
-    }
-
-    #[test]
     fn test_seeds() {
-        let base = make_address(7);
-        let seeds = Whitelist::seeds(&base);
-        assert_eq!(seeds.len(), 2);
+        let seeds = Whitelist::seeds();
+        assert_eq!(seeds.len(), 1);
         assert_eq!(seeds[0], b"whitelist".to_vec());
-        assert_eq!(seeds[1], base.to_bytes().to_vec());
     }
 
     #[test]
     fn test_find_program_address_deterministic() {
         let program_id = make_address(1);
-        let base = make_address(2);
-        let (pda1, bump1, seeds1) = Whitelist::find_program_address(&program_id, &base);
-        let (pda2, bump2, seeds2) = Whitelist::find_program_address(&program_id, &base);
+        let (pda1, bump1, seeds1) = Whitelist::find_program_address(&program_id);
+        let (pda2, bump2, seeds2) = Whitelist::find_program_address(&program_id);
         assert_eq!(pda1, pda2);
         assert_eq!(bump1, bump2);
         assert_eq!(seeds1, seeds2);
-    }
-
-    #[test]
-    fn test_find_program_address_different_bases_differ() {
-        let program_id = make_address(1);
-        let (pda1, _, _) = Whitelist::find_program_address(&program_id, &make_address(2));
-        let (pda2, _, _) = Whitelist::find_program_address(&program_id, &make_address(3));
-        assert_ne!(pda1, pda2);
     }
 
     #[test]

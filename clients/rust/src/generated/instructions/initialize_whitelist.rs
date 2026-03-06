@@ -15,8 +15,6 @@ pub const INITIALIZE_WHITELIST_DISCRIMINATOR: u8 = 0;
 pub struct InitializeWhitelist {
     pub payer: solana_pubkey::Pubkey,
 
-    pub base: solana_pubkey::Pubkey,
-
     pub whitelist: solana_pubkey::Pubkey,
 
     pub initial_admin: solana_pubkey::Pubkey,
@@ -34,9 +32,8 @@ impl InitializeWhitelist {
         &self,
         remaining_accounts: &[solana_instruction::AccountMeta],
     ) -> solana_instruction::Instruction {
-        let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_instruction::AccountMeta::new(self.payer, true));
-        accounts.push(solana_instruction::AccountMeta::new(self.base, true));
         accounts.push(solana_instruction::AccountMeta::new(self.whitelist, false));
         accounts.push(solana_instruction::AccountMeta::new_readonly(
             self.initial_admin,
@@ -86,14 +83,12 @@ impl Default for InitializeWhitelistInstructionData {
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` payer
-///   1. `[writable, signer]` base
-///   2. `[writable]` whitelist
-///   3. `[]` initial_admin
-///   4. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   1. `[writable]` whitelist
+///   2. `[]` initial_admin
+///   3. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Clone, Debug, Default)]
 pub struct InitializeWhitelistBuilder {
     payer: Option<solana_pubkey::Pubkey>,
-    base: Option<solana_pubkey::Pubkey>,
     whitelist: Option<solana_pubkey::Pubkey>,
     initial_admin: Option<solana_pubkey::Pubkey>,
     system_program: Option<solana_pubkey::Pubkey>,
@@ -107,11 +102,6 @@ impl InitializeWhitelistBuilder {
     #[inline(always)]
     pub fn payer(&mut self, payer: solana_pubkey::Pubkey) -> &mut Self {
         self.payer = Some(payer);
-        self
-    }
-    #[inline(always)]
-    pub fn base(&mut self, base: solana_pubkey::Pubkey) -> &mut Self {
-        self.base = Some(base);
         self
     }
     #[inline(always)]
@@ -149,7 +139,6 @@ impl InitializeWhitelistBuilder {
     pub fn instruction(&self) -> solana_instruction::Instruction {
         let accounts = InitializeWhitelist {
             payer: self.payer.expect("payer is not set"),
-            base: self.base.expect("base is not set"),
             whitelist: self.whitelist.expect("whitelist is not set"),
             initial_admin: self.initial_admin.expect("initial_admin is not set"),
             system_program: self
@@ -165,8 +154,6 @@ impl InitializeWhitelistBuilder {
 pub struct InitializeWhitelistCpiAccounts<'a, 'b> {
     pub payer: &'b solana_account_info::AccountInfo<'a>,
 
-    pub base: &'b solana_account_info::AccountInfo<'a>,
-
     pub whitelist: &'b solana_account_info::AccountInfo<'a>,
 
     pub initial_admin: &'b solana_account_info::AccountInfo<'a>,
@@ -180,8 +167,6 @@ pub struct InitializeWhitelistCpi<'a, 'b> {
     pub __program: &'b solana_account_info::AccountInfo<'a>,
 
     pub payer: &'b solana_account_info::AccountInfo<'a>,
-
-    pub base: &'b solana_account_info::AccountInfo<'a>,
 
     pub whitelist: &'b solana_account_info::AccountInfo<'a>,
 
@@ -198,7 +183,6 @@ impl<'a, 'b> InitializeWhitelistCpi<'a, 'b> {
         Self {
             __program: program,
             payer: accounts.payer,
-            base: accounts.base,
             whitelist: accounts.whitelist,
             initial_admin: accounts.initial_admin,
             system_program: accounts.system_program,
@@ -227,9 +211,8 @@ impl<'a, 'b> InitializeWhitelistCpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program_error::ProgramResult {
-        let mut accounts = Vec::with_capacity(5 + remaining_accounts.len());
+        let mut accounts = Vec::with_capacity(4 + remaining_accounts.len());
         accounts.push(solana_instruction::AccountMeta::new(*self.payer.key, true));
-        accounts.push(solana_instruction::AccountMeta::new(*self.base.key, true));
         accounts.push(solana_instruction::AccountMeta::new(
             *self.whitelist.key,
             false,
@@ -258,10 +241,9 @@ impl<'a, 'b> InitializeWhitelistCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(6 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(5 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.payer.clone());
-        account_infos.push(self.base.clone());
         account_infos.push(self.whitelist.clone());
         account_infos.push(self.initial_admin.clone());
         account_infos.push(self.system_program.clone());
@@ -282,10 +264,9 @@ impl<'a, 'b> InitializeWhitelistCpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` payer
-///   1. `[writable, signer]` base
-///   2. `[writable]` whitelist
-///   3. `[]` initial_admin
-///   4. `[]` system_program
+///   1. `[writable]` whitelist
+///   2. `[]` initial_admin
+///   3. `[]` system_program
 #[derive(Clone, Debug)]
 pub struct InitializeWhitelistCpiBuilder<'a, 'b> {
     instruction: Box<InitializeWhitelistCpiBuilderInstruction<'a, 'b>>,
@@ -296,7 +277,6 @@ impl<'a, 'b> InitializeWhitelistCpiBuilder<'a, 'b> {
         let instruction = Box::new(InitializeWhitelistCpiBuilderInstruction {
             __program: program,
             payer: None,
-            base: None,
             whitelist: None,
             initial_admin: None,
             system_program: None,
@@ -307,11 +287,6 @@ impl<'a, 'b> InitializeWhitelistCpiBuilder<'a, 'b> {
     #[inline(always)]
     pub fn payer(&mut self, payer: &'b solana_account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.payer = Some(payer);
-        self
-    }
-    #[inline(always)]
-    pub fn base(&mut self, base: &'b solana_account_info::AccountInfo<'a>) -> &mut Self {
-        self.instruction.base = Some(base);
         self
     }
     #[inline(always)]
@@ -374,8 +349,6 @@ impl<'a, 'b> InitializeWhitelistCpiBuilder<'a, 'b> {
 
             payer: self.instruction.payer.expect("payer is not set"),
 
-            base: self.instruction.base.expect("base is not set"),
-
             whitelist: self.instruction.whitelist.expect("whitelist is not set"),
 
             initial_admin: self
@@ -399,7 +372,6 @@ impl<'a, 'b> InitializeWhitelistCpiBuilder<'a, 'b> {
 struct InitializeWhitelistCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_account_info::AccountInfo<'a>,
     payer: Option<&'b solana_account_info::AccountInfo<'a>>,
-    base: Option<&'b solana_account_info::AccountInfo<'a>>,
     whitelist: Option<&'b solana_account_info::AccountInfo<'a>>,
     initial_admin: Option<&'b solana_account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_account_info::AccountInfo<'a>>,
