@@ -28,8 +28,8 @@ impl WhitelistManagementProgramClient {
         }
     }
 
-    pub async fn get_whitelist(&mut self, base: &Pubkey) -> Result<Whitelist, TestError> {
-        let pda = self.get_whitelist_pda(base);
+    pub async fn get_whitelist(&mut self) -> Result<Whitelist, TestError> {
+        let pda = self.get_whitelist_pda();
         let account = self.banks_client.get_account(pda).await?.unwrap();
         let whitelist =
             jito_whitelist_management_core::whitelist::Whitelist::try_from_slice_unchecked(
@@ -38,11 +38,10 @@ impl WhitelistManagementProgramClient {
         Ok(*whitelist)
     }
 
-    pub fn get_whitelist_pda(&self, base: &Pubkey) -> Pubkey {
+    pub fn get_whitelist_pda(&self) -> Pubkey {
         Pubkey::new_from_array(
             jito_whitelist_management_core::whitelist::Whitelist::find_program_address(
                 &jito_whitelist_management_program::id(),
-                base,
             )
             .0
             .to_bytes(),
@@ -51,32 +50,29 @@ impl WhitelistManagementProgramClient {
 
     pub async fn do_initialize_whitelist(
         &mut self,
-        base: &Keypair,
         initial_admin: Pubkey,
     ) -> Result<(), TestError> {
-        let whitelist_pda = self.get_whitelist_pda(&base.pubkey());
+        let whitelist_pda = self.get_whitelist_pda();
 
-        self.initialize_whitelist(base, whitelist_pda, initial_admin)
+        self.initialize_whitelist(whitelist_pda, initial_admin)
             .await
     }
 
     pub async fn initialize_whitelist(
         &mut self,
-        base: &Keypair,
         whitelist: Pubkey,
         initial_admin: Pubkey,
     ) -> Result<(), TestError> {
         let blockhash = self.banks_client.get_latest_blockhash().await?;
         let ix = InitializeWhitelistBuilder::new()
             .payer(self.payer.pubkey())
-            .base(base.pubkey())
             .whitelist(whitelist)
             .initial_admin(initial_admin)
             .instruction();
         self.process_transaction(&Transaction::new_signed_with_payer(
             &[ix],
             Some(&self.payer.pubkey()),
-            &[&self.payer, base],
+            &[&self.payer],
             blockhash,
         ))
         .await
@@ -86,10 +82,9 @@ impl WhitelistManagementProgramClient {
     pub async fn do_add_admin(
         &mut self,
         admin: &Keypair,
-        base: &Keypair,
         new_admin: Pubkey,
     ) -> Result<(), TestError> {
-        let whitelist_pda = self.get_whitelist_pda(&base.pubkey());
+        let whitelist_pda = self.get_whitelist_pda();
 
         self.add_admin(admin, whitelist_pda, new_admin).await
     }
@@ -120,10 +115,9 @@ impl WhitelistManagementProgramClient {
     pub async fn do_remove_admin(
         &mut self,
         admin: &Keypair,
-        base: &Keypair,
         admin_to_remove: Pubkey,
     ) -> Result<(), TestError> {
-        let whitelist_pda = self.get_whitelist_pda(&base.pubkey());
+        let whitelist_pda = self.get_whitelist_pda();
 
         self.remove_admin(admin, whitelist_pda, admin_to_remove)
             .await
@@ -155,10 +149,9 @@ impl WhitelistManagementProgramClient {
     pub async fn do_add_to_whitelist(
         &mut self,
         admin: &Keypair,
-        base: &Keypair,
         signer_to_add: Pubkey,
     ) -> Result<(), TestError> {
-        let whitelist_pda = self.get_whitelist_pda(&base.pubkey());
+        let whitelist_pda = self.get_whitelist_pda();
 
         self.add_to_whitelist(admin, whitelist_pda, signer_to_add)
             .await
@@ -190,10 +183,9 @@ impl WhitelistManagementProgramClient {
     pub async fn do_remove_from_whitelist(
         &mut self,
         admin: &Keypair,
-        base: &Keypair,
         signer_to_remove: Pubkey,
     ) -> Result<(), TestError> {
-        let whitelist_pda = self.get_whitelist_pda(&base.pubkey());
+        let whitelist_pda = self.get_whitelist_pda();
 
         self.remove_from_whitelist(admin, whitelist_pda, signer_to_remove)
             .await
