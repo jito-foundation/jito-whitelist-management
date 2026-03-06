@@ -67,7 +67,10 @@ mod tests {
             .do_remove_admin(&bad_admin, new_admin.pubkey())
             .await;
 
-        assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
+        assert_ix_error(
+            transaction_error,
+            InstructionError::Custom(JitoWhitelistManagementError::InvalidAdmin as u32),
+        );
     }
 
     #[tokio::test]

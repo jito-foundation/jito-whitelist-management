@@ -182,7 +182,7 @@ impl Whitelist {
             }
         }
 
-        Err(ProgramError::InvalidAccountData)
+        Err(WhitelistManagementError::InvalidAdmin.into())
     }
 }
 
