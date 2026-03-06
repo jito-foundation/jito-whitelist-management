@@ -11,11 +11,6 @@
           "isSigner": true
         },
         {
-          "name": "base",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "whitelist",
           "isMut": true,
           "isSigner": false
