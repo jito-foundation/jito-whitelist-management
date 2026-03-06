@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use borsh::BorshDeserialize;
 use jito_whitelist_management_client::{
     accounts::Whitelist,
@@ -8,7 +6,6 @@ use jito_whitelist_management_client::{
         RemoveFromWhitelistBuilder,
     },
 };
-use solana_keypair::read_keypair_file;
 use solana_pubkey::Pubkey;
 use solana_rpc_client::nonblocking::rpc_client::RpcClient;
 use solana_signer::{signers::Signers, Signer};
@@ -57,49 +54,33 @@ impl WhitelistManagementCliHandler {
     pub async fn handle(&self, action: WhitelistManagementCommands) -> anyhow::Result<()> {
         match action {
             WhitelistManagementCommands::Whitelist {
-                action: WhitelistManagementActions::Get { base },
-            } => self.get_whitelist(base).await,
+                action: WhitelistManagementActions::Get,
+            } => self.get_whitelist().await,
             WhitelistManagementCommands::Whitelist {
-                action:
-                    WhitelistManagementActions::Initialize {
-                        base,
-                        initial_admin,
-                    },
-            } => self.initialize_whitelist(base, initial_admin).await,
+                action: WhitelistManagementActions::Initialize { initial_admin },
+            } => self.initialize_whitelist(initial_admin).await,
             WhitelistManagementCommands::Whitelist {
-                action: WhitelistManagementActions::AddAdmin { base, new_admin },
-            } => self.add_admin(base, new_admin).await,
+                action: WhitelistManagementActions::AddAdmin { new_admin },
+            } => self.add_admin(new_admin).await,
             WhitelistManagementCommands::Whitelist {
-                action:
-                    WhitelistManagementActions::RemoveAdmin {
-                        base,
-                        admin_to_remove,
-                    },
-            } => self.remove_admin(base, admin_to_remove).await,
+                action: WhitelistManagementActions::RemoveAdmin { admin_to_remove },
+            } => self.remove_admin(admin_to_remove).await,
             WhitelistManagementCommands::Whitelist {
-                action:
-                    WhitelistManagementActions::AddToWhitelist {
-                        base,
-                        signer_to_add,
-                    },
-            } => self.add_to_whitelist(base, signer_to_add).await,
+                action: WhitelistManagementActions::AddToWhitelist { signer_to_add },
+            } => self.add_to_whitelist(signer_to_add).await,
             WhitelistManagementCommands::Whitelist {
-                action:
-                    WhitelistManagementActions::RemoveFromWhitelist {
-                        base,
-                        signer_to_remove,
-                    },
-            } => self.remove_from_whitelist(base, signer_to_remove).await,
+                action: WhitelistManagementActions::RemoveFromWhitelist { signer_to_remove },
+            } => self.remove_from_whitelist(signer_to_remove).await,
         }
     }
 
-    fn whitelist_address(&self, base: Pubkey) -> Pubkey {
+    fn whitelist_address(&self) -> Pubkey {
         let program_id = self.jito_whitelist_management_program_id;
-        Pubkey::find_program_address(&[b"whitelist", &base.to_bytes()], &program_id).0
+        Pubkey::find_program_address(&[b"whitelist"], &program_id).0
     }
 
-    async fn get_whitelist(&self, base: Pubkey) -> anyhow::Result<()> {
-        let jito_whitelist_management_address = self.whitelist_address(base);
+    async fn get_whitelist(&self) -> anyhow::Result<()> {
+        let jito_whitelist_management_address = self.whitelist_address();
         let account = self
             .get_account::<Whitelist>(&Pubkey::new_from_array(
                 jito_whitelist_management_address.to_bytes(),
@@ -111,13 +92,8 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn initialize_whitelist(
-        &self,
-        base: String,
-        initial_admin: Pubkey,
-    ) -> anyhow::Result<()> {
-        let base = read_keypair_file(base).unwrap();
-        let whitelist_address = self.whitelist_address(base.pubkey());
+    async fn initialize_whitelist(&self, initial_admin: Pubkey) -> anyhow::Result<()> {
+        let whitelist_address = self.whitelist_address();
         // let signer = self
         //     .cli_config
         //     .signer
@@ -127,7 +103,6 @@ impl WhitelistManagementCliHandler {
         let mut ix_builder = InitializeWhitelistBuilder::new();
         ix_builder
             .payer(self.cli_config.signer.pubkey())
-            .base(base.pubkey())
             .whitelist(whitelist_address)
             .initial_admin(initial_admin);
         let mut ix = ix_builder.instruction();
@@ -138,7 +113,7 @@ impl WhitelistManagementCliHandler {
         self.process_transaction(
             &[ix],
             &self.cli_config.signer.pubkey(),
-            &[self.cli_config.signer.clone(), Arc::new(base)],
+            std::slice::from_ref(&self.cli_config.signer),
         )
         .await?;
 
@@ -150,8 +125,8 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn add_admin(&self, base: Pubkey, new_admin: Pubkey) -> anyhow::Result<()> {
-        let whitelist_address = self.whitelist_address(base);
+    async fn add_admin(&self, new_admin: Pubkey) -> anyhow::Result<()> {
+        let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = AddAdminBuilder::new();
         ix_builder
@@ -178,8 +153,8 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn remove_admin(&self, base: Pubkey, admin_to_remove: Pubkey) -> anyhow::Result<()> {
-        let whitelist_address = self.whitelist_address(base);
+    async fn remove_admin(&self, admin_to_remove: Pubkey) -> anyhow::Result<()> {
+        let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = RemoveAdminBuilder::new();
         ix_builder
@@ -206,8 +181,8 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn add_to_whitelist(&self, base: Pubkey, signer_to_add: Pubkey) -> anyhow::Result<()> {
-        let whitelist_address = self.whitelist_address(base);
+    async fn add_to_whitelist(&self, signer_to_add: Pubkey) -> anyhow::Result<()> {
+        let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = AddToWhitelistBuilder::new();
         ix_builder
@@ -234,12 +209,8 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn remove_from_whitelist(
-        &self,
-        base: Pubkey,
-        signer_to_remove: Pubkey,
-    ) -> anyhow::Result<()> {
-        let whitelist_address = self.whitelist_address(base);
+    async fn remove_from_whitelist(&self, signer_to_remove: Pubkey) -> anyhow::Result<()> {
+        let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = RemoveFromWhitelistBuilder::new();
         ix_builder
