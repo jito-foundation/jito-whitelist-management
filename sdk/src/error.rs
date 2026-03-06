@@ -14,6 +14,9 @@ pub enum WhitelistManagementError {
 
     #[error("ListFull")]
     ListFull = 1003,
+
+    #[error("DuplicateEntry")]
+    DuplicateEntry = 1004,
 }
 
 impl From<WhitelistManagementError> for ProgramError {

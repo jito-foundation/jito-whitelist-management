@@ -22,6 +22,9 @@ pub enum JitoWhitelistManagementError {
     /// 1003 - ListFull
     #[error("ListFull")]
     ListFull = 0x3EB,
+    /// 1004 - DuplicateEntry
+    #[error("DuplicateEntry")]
+    DuplicateEntry = 0x3EC,
 }
 
 impl From<JitoWhitelistManagementError> for solana_program_error::ProgramError {

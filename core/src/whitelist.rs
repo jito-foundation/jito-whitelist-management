@@ -123,6 +123,10 @@ impl Whitelist {
     #[inline(always)]
     pub fn add_admin(&mut self, admin: Pubkey) -> Result<(), ProgramError> {
         for a in self.admins.iter_mut() {
+            if *a == admin {
+                return Err(WhitelistManagementError::DuplicateEntry.into());
+            }
+
             if *a == EMPTY_ADDRESS {
                 *a = admin;
                 return Ok(());
@@ -153,6 +157,10 @@ impl Whitelist {
     #[inline(always)]
     pub fn add_to_whitelist(&mut self, signer_to_add: Pubkey) -> Result<(), ProgramError> {
         for a in self.whitelist.iter_mut() {
+            if *a == signer_to_add {
+                return Err(WhitelistManagementError::DuplicateEntry.into());
+            }
+
             if *a == EMPTY_ADDRESS {
                 *a = signer_to_add;
                 return Ok(());
@@ -436,5 +444,25 @@ mod tests {
         wl.add_to_whitelist(make_address(3)).unwrap();
         assert_eq!(wl.whitelist[0], make_address(3));
         assert_eq!(wl.whitelist[1], make_address(2));
+    }
+
+    #[test]
+    fn test_add_duplicate_admin_returns_error() {
+        let mut wl = Whitelist::default();
+        wl.add_admin(make_address(1)).unwrap();
+        assert!(wl.add_admin(make_address(1)).is_err());
+        // Only one slot should be occupied
+        assert_eq!(wl.admins[0], make_address(1));
+        assert!(wl.admins[1..].iter().all(|a| *a == EMPTY_ADDRESS));
+    }
+
+    #[test]
+    fn test_add_duplicate_whitelist_signer_returns_error() {
+        let mut wl = Whitelist::default();
+        wl.add_to_whitelist(make_address(1)).unwrap();
+        assert!(wl.add_to_whitelist(make_address(1)).is_err());
+        // Only one slot should be occupied
+        assert_eq!(wl.whitelist[0], make_address(1));
+        assert!(wl.whitelist[1..].iter().all(|a| *a == EMPTY_ADDRESS));
     }
 }

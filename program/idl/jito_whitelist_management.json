@@ -194,6 +194,11 @@
       "code": 1003,
       "name": "ListFull",
       "msg": "ListFull"
+    },
+    {
+      "code": 1004,
+      "name": "DuplicateEntry",
+      "msg": "DuplicateEntry"
     }
   ],
   "metadata": {
