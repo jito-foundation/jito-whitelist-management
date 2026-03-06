@@ -184,6 +184,11 @@
       "code": 1001,
       "name": "InvalidAdmin",
       "msg": "InvalidAdmin"
+    },
+    {
+      "code": 1002,
+      "name": "AdminSelfRemoval",
+      "msg": "AdminSelfRemoval"
     }
   ],
   "metadata": {

@@ -93,6 +93,9 @@ mod tests {
             .do_remove_admin(&admin, admin.pubkey())
             .await;
 
-        assert_ix_error(transaction_error, InstructionError::InvalidAccountData);
+        assert_ix_error(
+            transaction_error,
+            InstructionError::Custom(JitoWhitelistManagementError::AdminSelfRemoval as u32),
+        );
     }
 }

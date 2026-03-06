@@ -137,7 +137,7 @@ impl Whitelist {
         admin_to_remove: &Pubkey,
     ) -> Result<(), ProgramError> {
         if admin == admin_to_remove {
-            return Err(ProgramError::InvalidAccountData);
+            return Err(WhitelistManagementError::AdminSelfRemoval.into());
         }
 
         for a in self.admins.iter_mut() {

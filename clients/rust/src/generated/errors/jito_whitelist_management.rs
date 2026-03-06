@@ -16,6 +16,9 @@ pub enum JitoWhitelistManagementError {
     /// 1001 - InvalidAdmin
     #[error("InvalidAdmin")]
     InvalidAdmin = 0x3E9,
+    /// 1002 - AdminSelfRemoval
+    #[error("AdminSelfRemoval")]
+    AdminSelfRemoval = 0x3EA,
 }
 
 impl From<JitoWhitelistManagementError> for solana_program_error::ProgramError {
