@@ -5,6 +5,9 @@ use thiserror::Error;
 pub enum WhitelistManagementError {
     #[error("ArithmeticOverflow")]
     ArithmeticOverflow = 1000,
+
+    #[error("ListFull")]
+    ListFull = 1001,
 }
 
 impl From<WhitelistManagementError> for ProgramError {

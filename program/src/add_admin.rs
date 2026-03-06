@@ -29,7 +29,7 @@ pub fn process_add_admin(program_id: &Pubkey, accounts: &[AccountInfo]) -> Progr
 
     let mut whitelist_data = whitelist_info.data.borrow_mut();
     let whitelist = Whitelist::try_from_slice_unchecked_mut(&mut whitelist_data)?;
-    whitelist.add_admin(*new_admin_info.key);
+    whitelist.add_admin(*new_admin_info.key)?;
 
     Ok(())
 }

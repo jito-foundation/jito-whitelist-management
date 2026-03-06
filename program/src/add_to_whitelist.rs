@@ -29,7 +29,7 @@ pub fn process_add_to_whitelist(program_id: &Pubkey, accounts: &[AccountInfo]) -
 
     let mut whitelist_data = whitelist_info.data.borrow_mut();
     let whitelist = Whitelist::try_from_slice_unchecked_mut(&mut whitelist_data)?;
-    whitelist.add_to_whitelist(*signer_to_add.key);
+    whitelist.add_to_whitelist(*signer_to_add.key)?;
 
     Ok(())
 }

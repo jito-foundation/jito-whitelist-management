@@ -10,6 +10,7 @@ edition.workspace = true
 [dependencies]
 bytemuck.workspace = true
 jito-bytemuck.workspace = true
+jito-whitelist-management-sdk.workspace = true
 shank.workspace = true
 solana-account-info.workspace = true
 solana-address.workspace = true
