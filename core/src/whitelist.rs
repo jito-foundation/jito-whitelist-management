@@ -1,5 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use jito_bytemuck::{AccountDeserialize, Discriminator};
+use jito_whitelist_management_sdk::error::WhitelistManagementError;
 use shank::ShankAccount;
 use solana_account_info::AccountInfo;
 use solana_program_error::ProgramError;
@@ -181,7 +182,7 @@ impl Whitelist {
             }
         }
 
-        Err(ProgramError::InvalidAccountData)
+        Err(WhitelistManagementError::InvalidAdmin.into())
     }
 }
 
