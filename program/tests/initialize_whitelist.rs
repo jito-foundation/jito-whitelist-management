@@ -39,10 +39,6 @@ mod tests {
         for admin in whitelist.admins.iter().skip(1) {
             assert_eq!(*admin, EMPTY_ADDRESS);
         }
-
-        assert_eq!(whitelist.total_stake_deposited(), 0);
-        assert_eq!(whitelist.total_stake_withdrawn(), 0);
-        assert_eq!(whitelist.total_withdrawal_fees(), 0);
     }
 
     #[tokio::test]

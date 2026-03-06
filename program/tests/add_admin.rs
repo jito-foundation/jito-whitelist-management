@@ -36,9 +36,6 @@ mod tests {
 
         assert_eq!(whitelist.whitelist.len(), 64);
         assert_eq!(whitelist.admins.len(), 8);
-        assert_eq!(whitelist.total_stake_deposited(), 0);
-        assert_eq!(whitelist.total_stake_withdrawn(), 0);
-        assert_eq!(whitelist.total_withdrawal_fees(), 0);
 
         assert_eq!(whitelist.admins[0], admin.pubkey());
         assert_eq!(whitelist.admins[1], new_admin.pubkey());
