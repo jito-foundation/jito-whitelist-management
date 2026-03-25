@@ -2,7 +2,7 @@ use jito_bytemuck::{AccountDeserialize, Discriminator};
 use jito_whitelist_management_core::whitelist::{Whitelist, EMPTY_ADDRESS};
 use jito_whitelist_management_sdk::error::WhitelistManagementError;
 use solana_account_info::AccountInfo;
-use solana_cpi::invoke_signed;
+use solana_cpi::{invoke, invoke_signed};
 use solana_program_error::{ProgramError, ProgramResult};
 use solana_program_log::log;
 use solana_pubkey::Pubkey;
@@ -67,25 +67,73 @@ pub fn process_initialize_whitelist(
         .checked_add(size_of::<Whitelist>() as u64)
         .ok_or(WhitelistManagementError::ArithmeticOverflow)?;
 
-    invoke_signed(
-        &solana_system_interface::instruction::create_account(
-            payer_info.key,
-            whitelist_info.key,
-            rent.minimum_balance(space as usize),
-            space,
-            &crate::id(),
-        ),
-        &[
-            payer_info.clone(),
-            whitelist_info.clone(),
-            system_program_info.clone(),
-        ],
-        &[whitelist_seeds
-            .iter()
-            .map(|seed| seed.as_slice())
-            .collect::<Vec<&[u8]>>()
-            .as_slice()],
-    )?;
+    let current_lamports = **whitelist_info.try_borrow_lamports()?;
+    if current_lamports == 0 {
+        // If there are no lamports in the account, we create it with create_account
+        invoke_signed(
+            &solana_system_interface::instruction::create_account(
+                payer_info.key,
+                whitelist_info.key,
+                rent.minimum_balance(space as usize),
+                space,
+                &crate::id(),
+            ),
+            &[
+                payer_info.clone(),
+                whitelist_info.clone(),
+                system_program_info.clone(),
+            ],
+            &[whitelist_seeds
+                .iter()
+                .map(|seed| seed.as_slice())
+                .collect::<Vec<&[u8]>>()
+                .as_slice()],
+        )?;
+    } else {
+        // Someone can transfer lamports to accounts before they're initialized.
+        // In that case, create_account won't work. Instead, transfer the deficit,
+        // allocate the required space, and assign ownership to the program.
+        let required_lamports = rent
+            .minimum_balance(space as usize)
+            .max(1)
+            .saturating_sub(current_lamports);
+        if required_lamports > 0 {
+            invoke(
+                &solana_system_interface::instruction::transfer(
+                    payer_info.key,
+                    whitelist_info.key,
+                    required_lamports,
+                ),
+                &[
+                    payer_info.clone(),
+                    whitelist_info.clone(),
+                    system_program_info.clone(),
+                ],
+            )?;
+        }
+
+        // Allocate space
+        invoke_signed(
+            &solana_system_interface::instruction::allocate(whitelist_info.key, space),
+            &[whitelist_info.clone(), system_program_info.clone()],
+            &[whitelist_seeds
+                .iter()
+                .map(|seed| seed.as_slice())
+                .collect::<Vec<&[u8]>>()
+                .as_slice()],
+        )?;
+
+        // Assign to this program
+        invoke_signed(
+            &solana_system_interface::instruction::assign(whitelist_info.key, &crate::id()),
+            &[whitelist_info.clone(), system_program_info.clone()],
+            &[whitelist_seeds
+                .iter()
+                .map(|seed| seed.as_slice())
+                .collect::<Vec<&[u8]>>()
+                .as_slice()],
+        )?;
+    }
 
     let mut whitelist_data = whitelist_info.data.borrow_mut();
     whitelist_data[0] = Whitelist::DISCRIMINATOR;
