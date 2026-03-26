@@ -18,11 +18,6 @@ pub fn process_remove_from_whitelist(
         return Err(ProgramError::MissingRequiredSignature);
     }
 
-    if !admin_info.is_writable {
-        log("Admin is not writable");
-        return Err(ProgramError::InvalidAccountData);
-    }
-
     {
         let whitelist_data = whitelist_info.data.borrow();
         let whitelist = Whitelist::try_from_slice_unchecked(&whitelist_data)?;
@@ -32,7 +27,7 @@ pub fn process_remove_from_whitelist(
 
     let mut whitelist_data = whitelist_info.data.borrow_mut();
     let whitelist = Whitelist::try_from_slice_unchecked_mut(&mut whitelist_data)?;
-    whitelist.remove_from_whitelist(*signer_to_remove.key);
+    whitelist.remove_from_whitelist(*signer_to_remove.key)?;
 
     Ok(())
 }

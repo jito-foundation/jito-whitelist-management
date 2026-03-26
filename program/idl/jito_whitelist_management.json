@@ -37,7 +37,7 @@
       "accounts": [
         {
           "name": "admin",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -62,7 +62,7 @@
       "accounts": [
         {
           "name": "admin",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -87,7 +87,7 @@
       "accounts": [
         {
           "name": "admin",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -112,7 +112,7 @@
       "accounts": [
         {
           "name": "admin",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -199,6 +199,11 @@
       "code": 1004,
       "name": "DuplicateEntry",
       "msg": "DuplicateEntry"
+    },
+    {
+      "code": 1005,
+      "name": "EntryNotFound",
+      "msg": "EntryNotFound"
     }
   ],
   "metadata": {

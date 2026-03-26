@@ -122,17 +122,22 @@ impl Whitelist {
 
     #[inline(always)]
     pub fn add_admin(&mut self, admin: Pubkey) -> Result<(), ProgramError> {
-        for a in self.admins.iter_mut() {
+        let mut first_empty: Option<usize> = None;
+        for (i, a) in self.admins.iter().enumerate() {
             if *a == admin {
                 return Err(WhitelistManagementError::DuplicateEntry.into());
             }
-
-            if *a == EMPTY_ADDRESS {
-                *a = admin;
-                return Ok(());
+            if first_empty.is_none() && *a == EMPTY_ADDRESS {
+                first_empty = Some(i);
             }
         }
-        Err(WhitelistManagementError::ListFull.into())
+        match first_empty {
+            Some(i) => {
+                self.admins[i] = admin;
+                Ok(())
+            }
+            None => Err(WhitelistManagementError::ListFull.into()),
+        }
     }
 
     #[inline(always)]
@@ -156,27 +161,37 @@ impl Whitelist {
 
     #[inline(always)]
     pub fn add_to_whitelist(&mut self, signer_to_add: Pubkey) -> Result<(), ProgramError> {
-        for a in self.whitelist.iter_mut() {
+        let mut first_empty: Option<usize> = None;
+        for (i, a) in self.whitelist.iter().enumerate() {
             if *a == signer_to_add {
                 return Err(WhitelistManagementError::DuplicateEntry.into());
             }
-
-            if *a == EMPTY_ADDRESS {
-                *a = signer_to_add;
-                return Ok(());
+            if first_empty.is_none() && *a == EMPTY_ADDRESS {
+                first_empty = Some(i);
             }
         }
-        Err(WhitelistManagementError::ListFull.into())
+        match first_empty {
+            Some(i) => {
+                self.whitelist[i] = signer_to_add;
+                Ok(())
+            }
+            None => Err(WhitelistManagementError::ListFull.into()),
+        }
     }
 
     #[inline(always)]
-    pub fn remove_from_whitelist(&mut self, signer_to_remove: Pubkey) {
+    pub fn remove_from_whitelist(&mut self, signer_to_remove: Pubkey) -> Result<(), ProgramError> {
+        if Self::is_empty_address(&signer_to_remove) {
+            return Err(WhitelistManagementError::EntryNotFound.into());
+        }
+
         for a in self.whitelist.iter_mut() {
             if *a == signer_to_remove {
                 *a = EMPTY_ADDRESS;
-                break;
+                return Ok(());
             }
         }
+        Err(WhitelistManagementError::EntryNotFound.into())
     }
 
     #[inline(always)]
@@ -361,7 +376,7 @@ mod tests {
     fn test_remove_from_whitelist() {
         let mut wl = Whitelist::default();
         wl.add_to_whitelist(make_address(1)).unwrap();
-        wl.remove_from_whitelist(make_address(1));
+        wl.remove_from_whitelist(make_address(1)).unwrap();
         assert_eq!(wl.whitelist[0], EMPTY_ADDRESS);
     }
 
@@ -369,8 +384,14 @@ mod tests {
     fn test_remove_from_whitelist_not_present() {
         let mut wl = Whitelist::default();
         wl.add_to_whitelist(make_address(1)).unwrap();
-        wl.remove_from_whitelist(make_address(99));
+        assert!(wl.remove_from_whitelist(make_address(99)).is_err());
         assert_eq!(wl.whitelist[0], make_address(1));
+    }
+
+    #[test]
+    fn test_remove_from_whitelist_empty_address() {
+        let mut wl = Whitelist::default();
+        assert!(wl.remove_from_whitelist(EMPTY_ADDRESS).is_err());
     }
 
     #[test]
@@ -378,7 +399,7 @@ mod tests {
         let mut wl = Whitelist::default();
         wl.whitelist[0] = make_address(1);
         wl.whitelist[1] = make_address(1);
-        wl.remove_from_whitelist(make_address(1));
+        wl.remove_from_whitelist(make_address(1)).unwrap();
         assert_eq!(wl.whitelist[0], EMPTY_ADDRESS);
         assert_eq!(wl.whitelist[1], make_address(1));
     }
@@ -440,7 +461,7 @@ mod tests {
         let mut wl = Whitelist::default();
         wl.add_to_whitelist(make_address(1)).unwrap();
         wl.add_to_whitelist(make_address(2)).unwrap();
-        wl.remove_from_whitelist(make_address(1));
+        wl.remove_from_whitelist(make_address(1)).unwrap();
         wl.add_to_whitelist(make_address(3)).unwrap();
         assert_eq!(wl.whitelist[0], make_address(3));
         assert_eq!(wl.whitelist[1], make_address(2));

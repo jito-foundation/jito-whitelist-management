@@ -31,7 +31,9 @@ impl AddToWhitelist {
         remaining_accounts: &[solana_instruction::AccountMeta],
     ) -> solana_instruction::Instruction {
         let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
-        accounts.push(solana_instruction::AccountMeta::new(self.admin, true));
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
+            self.admin, true,
+        ));
         accounts.push(solana_instruction::AccountMeta::new(self.whitelist, false));
         accounts.push(solana_instruction::AccountMeta::new_readonly(
             self.signer_to_add,
@@ -74,7 +76,7 @@ impl Default for AddToWhitelistInstructionData {
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` admin
+///   0. `[signer]` admin
 ///   1. `[writable]` whitelist
 ///   2. `[]` signer_to_add
 #[derive(Clone, Debug, Default)]
@@ -188,7 +190,10 @@ impl<'a, 'b> AddToWhitelistCpi<'a, 'b> {
         remaining_accounts: &[(&'b solana_account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program_error::ProgramResult {
         let mut accounts = Vec::with_capacity(3 + remaining_accounts.len());
-        accounts.push(solana_instruction::AccountMeta::new(*self.admin.key, true));
+        accounts.push(solana_instruction::AccountMeta::new_readonly(
+            *self.admin.key,
+            true,
+        ));
         accounts.push(solana_instruction::AccountMeta::new(
             *self.whitelist.key,
             false,
@@ -232,7 +237,7 @@ impl<'a, 'b> AddToWhitelistCpi<'a, 'b> {
 ///
 /// ### Accounts:
 ///
-///   0. `[writable, signer]` admin
+///   0. `[signer]` admin
 ///   1. `[writable]` whitelist
 ///   2. `[]` signer_to_add
 #[derive(Clone, Debug)]
