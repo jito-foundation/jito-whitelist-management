@@ -15,11 +15,6 @@ pub fn process_add_to_whitelist(program_id: &Pubkey, accounts: &[AccountInfo]) -
         return Err(ProgramError::MissingRequiredSignature);
     }
 
-    if !admin_info.is_writable {
-        log("Admin is not writable");
-        return Err(ProgramError::InvalidAccountData);
-    }
-
     {
         let whitelist_data = whitelist_info.data.borrow();
         let whitelist = Whitelist::try_from_slice_unchecked(&whitelist_data)?;
