@@ -17,6 +17,9 @@ pub enum WhitelistManagementError {
 
     #[error("DuplicateEntry")]
     DuplicateEntry = 1004,
+
+    #[error("EntryNotFound")]
+    EntryNotFound = 1005,
 }
 
 impl From<WhitelistManagementError> for ProgramError {

@@ -199,6 +199,11 @@
       "code": 1004,
       "name": "DuplicateEntry",
       "msg": "DuplicateEntry"
+    },
+    {
+      "code": 1005,
+      "name": "EntryNotFound",
+      "msg": "EntryNotFound"
     }
   ],
   "metadata": {
