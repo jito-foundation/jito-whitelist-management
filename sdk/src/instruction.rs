@@ -11,25 +11,25 @@ pub enum JitoWhitelistManagementInstruction {
     InitializeWhitelist,
 
     /// Add admin
-    #[account(0, writable, signer, name = "admin")]
+    #[account(0, signer, name = "admin")]
     #[account(1, writable, name = "whitelist")]
     #[account(2, name = "new_admin")]
     AddAdmin,
 
     /// Remove Admin
-    #[account(0, writable, signer, name = "admin")]
+    #[account(0, signer, name = "admin")]
     #[account(1, writable, name = "whitelist")]
     #[account(2, name = "admin_to_remove")]
     RemoveAdmin,
 
     // Add To Whitelist
-    #[account(0, writable, signer, name = "admin")]
+    #[account(0, signer, name = "admin")]
     #[account(1, writable, name = "whitelist")]
     #[account(2, name = "signer_to_add")]
     AddToWhitelist,
 
     // Remove From Whitelist
-    #[account(0, writable, signer, name = "admin")]
+    #[account(0, signer, name = "admin")]
     #[account(1, writable, name = "whitelist")]
     #[account(2, name = "signer_to_remove")]
     RemoveFromWhitelist,
