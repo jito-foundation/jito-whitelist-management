@@ -25,6 +25,9 @@ pub enum JitoWhitelistManagementError {
     /// 1004 - DuplicateEntry
     #[error("DuplicateEntry")]
     DuplicateEntry = 0x3EC,
+    /// 1005 - EntryNotFound
+    #[error("EntryNotFound")]
+    EntryNotFound = 0x3ED,
 }
 
 impl From<JitoWhitelistManagementError> for solana_program_error::ProgramError {
