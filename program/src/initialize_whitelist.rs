@@ -95,7 +95,6 @@ pub fn process_initialize_whitelist(
         // allocate the required space, and assign ownership to the program.
         let required_lamports = rent
             .minimum_balance(space as usize)
-            .max(1)
             .saturating_sub(current_lamports);
         if required_lamports > 0 {
             invoke(
