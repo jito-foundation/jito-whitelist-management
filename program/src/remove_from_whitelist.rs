@@ -32,7 +32,7 @@ pub fn process_remove_from_whitelist(
 
     let mut whitelist_data = whitelist_info.data.borrow_mut();
     let whitelist = Whitelist::try_from_slice_unchecked_mut(&mut whitelist_data)?;
-    whitelist.remove_from_whitelist(*signer_to_remove.key);
+    whitelist.remove_from_whitelist(*signer_to_remove.key)?;
 
     Ok(())
 }
