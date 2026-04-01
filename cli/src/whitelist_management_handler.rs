@@ -270,7 +270,7 @@ impl WhitelistManagementCliHandler {
         let rpc_client = self.get_rpc_client();
 
         let account = rpc_client.get_account(account_pubkey).await?;
-        let account = T::try_from_slice_unchecked(&mut account.data.as_slice())?;
+        let account = T::try_from_slice_unchecked(account.data.as_slice())?;
 
         Ok(*account)
     }
