@@ -42,6 +42,46 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_initialize_whitelist_with_lamports_ok() {
+        let mut fixture = TestBuilder::new().await;
+        let mut whitelist_management_program_client = fixture.whitelist_management_program_client();
+
+        let admin = Keypair::new();
+        fixture.transfer(&admin.pubkey(), 1.0).await.unwrap();
+
+        fixture
+            .transfer(
+                &whitelist_management_program_client.get_whitelist_pda(),
+                0.1,
+            )
+            .await
+            .unwrap();
+
+        whitelist_management_program_client
+            .do_initialize_whitelist(admin.pubkey())
+            .await
+            .unwrap();
+
+        let whitelist = whitelist_management_program_client
+            .get_whitelist()
+            .await
+            .unwrap();
+
+        assert_eq!(whitelist.whitelist.len(), 64);
+
+        for pubkey in whitelist.whitelist.iter() {
+            assert_eq!(*pubkey, EMPTY_ADDRESS);
+        }
+
+        assert_eq!(whitelist.admins.len(), 8);
+        assert_eq!(whitelist.admins[0], admin.pubkey());
+
+        for admin in whitelist.admins.iter().skip(1) {
+            assert_eq!(*admin, EMPTY_ADDRESS);
+        }
+    }
+
+    #[tokio::test]
     async fn test_initialize_whitelist_double_init_fails() {
         let mut fixture = TestBuilder::new().await;
         let mut whitelist_management_program_client = fixture.whitelist_management_program_client();
