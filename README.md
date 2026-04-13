@@ -41,7 +41,7 @@ make test
 
 | Group    | Date       | Commit                                                                        |
 |----------|------------|-------------------------------------------------------------------------------|
-| Certora  | 2026-03-20 | [9ca381a](security_audits/certora_jito_coinbase_integration_audit_v0.1.pdf)   |
+| Certora  | 2026-03-20 | [9ca381a](security-audits/certora_jito_coinbase_integration_audit_v0.1.pdf)   |
 
 ## License
 
