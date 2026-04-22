@@ -3082,6 +3082,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "borsh 1.6.0",
+ "bs58",
  "clap",
  "env_logger",
  "jito-bytemuck",

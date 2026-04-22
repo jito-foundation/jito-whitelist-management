@@ -14,6 +14,7 @@ edition = "2021"
 anchor-lang = { version = "0.32.1" }
 anyhow = "1.0.101"
 borsh = { version = "1.6.0", features = ["derive"] }
+bs58 = "0.5.1"
 bytemuck = "1.19.0"
 clap = { version = "4.5.58", features = ["derive", "env"] }
 env_logger = "0.11.9"
