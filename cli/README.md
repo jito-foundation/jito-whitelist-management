@@ -60,6 +60,21 @@ cargo r -p jito-whitelist-management-cli -- \
     --jito-whitelist-management-program-id Wh1tea995dSzf9q4bmUCPM8s6URjT1HWMrp771bLW7G
 ```
 
+##### Squads
+
+```bash
+cargo r -p jito-whitelist-management-cli -- \
+    whitelist-management \
+    whitelist \
+    remove-admin \
+    --admin 9eZbWiHsPRsxLSiHxzg2pkXsAuQMwAjQrda7C7e21Fw6 \
+    --admin-to-remove BBBATax9kikSHQp8UTcyQL3tfU3BmQD9yid5qhC7QEAA \
+    --print-tx \
+    --signer ~/.config/solana/id.json \
+    --commitment confirmed \
+    --jito-whitelist-management-program-id Wh1tea995dSzf9q4bmUCPM8s6URjT1HWMrp771bLW7G
+```
+
 #### Add To Whitelist
 
 ```bash
