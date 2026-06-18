@@ -58,17 +58,29 @@ impl WhitelistManagementCliHandler {
                 action: WhitelistManagementActions::Initialize { initial_admin },
             } => self.initialize_whitelist(initial_admin).await,
             WhitelistManagementCommands::Whitelist {
-                action: WhitelistManagementActions::AddAdmin { new_admin },
-            } => self.add_admin(new_admin).await,
+                action: WhitelistManagementActions::AddAdmin { admin, new_admin },
+            } => self.add_admin(admin, new_admin).await,
             WhitelistManagementCommands::Whitelist {
-                action: WhitelistManagementActions::RemoveAdmin { admin_to_remove },
-            } => self.remove_admin(admin_to_remove).await,
+                action:
+                    WhitelistManagementActions::RemoveAdmin {
+                        admin,
+                        admin_to_remove,
+                    },
+            } => self.remove_admin(admin, admin_to_remove).await,
             WhitelistManagementCommands::Whitelist {
-                action: WhitelistManagementActions::AddToWhitelist { signer_to_add },
-            } => self.add_to_whitelist(signer_to_add).await,
+                action:
+                    WhitelistManagementActions::AddToWhitelist {
+                        admin,
+                        signer_to_add,
+                    },
+            } => self.add_to_whitelist(admin, signer_to_add).await,
             WhitelistManagementCommands::Whitelist {
-                action: WhitelistManagementActions::RemoveFromWhitelist { signer_to_remove },
-            } => self.remove_from_whitelist(signer_to_remove).await,
+                action:
+                    WhitelistManagementActions::RemoveFromWhitelist {
+                        admin,
+                        signer_to_remove,
+                    },
+            } => self.remove_from_whitelist(admin, signer_to_remove).await,
         }
     }
 
@@ -138,12 +150,13 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn add_admin(&self, new_admin: Pubkey) -> anyhow::Result<()> {
+    async fn add_admin(&self, admin: Option<Pubkey>, new_admin: Pubkey) -> anyhow::Result<()> {
+        let admin = admin.unwrap_or_else(|| self.cli_config.signer.pubkey());
         let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = AddAdminBuilder::new();
         ix_builder
-            .admin(self.cli_config.signer.pubkey())
+            .admin(admin)
             .whitelist(whitelist_address)
             .new_admin(new_admin);
         let mut ix = ix_builder.instruction();
@@ -151,14 +164,15 @@ impl WhitelistManagementCliHandler {
 
         log::info!("Adding new admin parameters: {ix_builder:?}",);
 
-        self.process_transaction(
-            &[ix],
-            &self.cli_config.signer.pubkey(),
-            std::slice::from_ref(&self.cli_config.signer),
-        )
-        .await?;
-
-        if !self.print_tx {
+        if self.print_tx {
+            self.print_base58_tx(&[ix]);
+        } else {
+            self.process_transaction(
+                &[ix],
+                &self.cli_config.signer.pubkey(),
+                std::slice::from_ref(&self.cli_config.signer),
+            )
+            .await?;
             let account = self.get_account::<Whitelist>(&whitelist_address).await?;
             log::info!("{account:?}");
         }
@@ -166,12 +180,17 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn remove_admin(&self, admin_to_remove: Pubkey) -> anyhow::Result<()> {
+    async fn remove_admin(
+        &self,
+        admin: Option<Pubkey>,
+        admin_to_remove: Pubkey,
+    ) -> anyhow::Result<()> {
+        let admin = admin.unwrap_or_else(|| self.cli_config.signer.pubkey());
         let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = RemoveAdminBuilder::new();
         ix_builder
-            .admin(self.cli_config.signer.pubkey())
+            .admin(admin)
             .whitelist(whitelist_address)
             .admin_to_remove(admin_to_remove);
         let mut ix = ix_builder.instruction();
@@ -179,14 +198,16 @@ impl WhitelistManagementCliHandler {
 
         log::info!("Removing admin parameters: {ix_builder:?}",);
 
-        self.process_transaction(
-            &[ix],
-            &self.cli_config.signer.pubkey(),
-            std::slice::from_ref(&self.cli_config.signer),
-        )
-        .await?;
+        if self.print_tx {
+            self.print_base58_tx(&[ix]);
+        } else {
+            self.process_transaction(
+                &[ix],
+                &self.cli_config.signer.pubkey(),
+                std::slice::from_ref(&self.cli_config.signer),
+            )
+            .await?;
 
-        if !self.print_tx {
             let account = self.get_account::<Whitelist>(&whitelist_address).await?;
             log::info!("{account:?}");
         }
@@ -194,12 +215,17 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn add_to_whitelist(&self, signer_to_add: Pubkey) -> anyhow::Result<()> {
+    async fn add_to_whitelist(
+        &self,
+        admin: Option<Pubkey>,
+        signer_to_add: Pubkey,
+    ) -> anyhow::Result<()> {
+        let admin = admin.unwrap_or_else(|| self.cli_config.signer.pubkey());
         let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = AddToWhitelistBuilder::new();
         ix_builder
-            .admin(self.cli_config.signer.pubkey())
+            .admin(admin)
             .whitelist(whitelist_address)
             .signer_to_add(signer_to_add);
         let mut ix = ix_builder.instruction();
@@ -207,14 +233,16 @@ impl WhitelistManagementCliHandler {
 
         log::info!("Adding to whitelist parameters: {ix_builder:?}",);
 
-        self.process_transaction(
-            &[ix],
-            &self.cli_config.signer.pubkey(),
-            std::slice::from_ref(&self.cli_config.signer),
-        )
-        .await?;
+        if self.print_tx {
+            self.print_base58_tx(&[ix]);
+        } else {
+            self.process_transaction(
+                &[ix],
+                &self.cli_config.signer.pubkey(),
+                std::slice::from_ref(&self.cli_config.signer),
+            )
+            .await?;
 
-        if !self.print_tx {
             let account = self.get_account::<Whitelist>(&whitelist_address).await?;
             log::info!("{account:?}");
         }
@@ -222,12 +250,17 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    async fn remove_from_whitelist(&self, signer_to_remove: Pubkey) -> anyhow::Result<()> {
+    async fn remove_from_whitelist(
+        &self,
+        admin: Option<Pubkey>,
+        signer_to_remove: Pubkey,
+    ) -> anyhow::Result<()> {
+        let admin = admin.unwrap_or_else(|| self.cli_config.signer.pubkey());
         let whitelist_address = self.whitelist_address();
 
         let mut ix_builder = RemoveFromWhitelistBuilder::new();
         ix_builder
-            .admin(self.cli_config.signer.pubkey())
+            .admin(admin)
             .whitelist(whitelist_address)
             .signer_to_remove(signer_to_remove);
         let mut ix = ix_builder.instruction();
@@ -235,14 +268,16 @@ impl WhitelistManagementCliHandler {
 
         log::info!("Removing from whitelist parameters: {ix_builder:?}",);
 
-        self.process_transaction(
-            &[ix],
-            &self.cli_config.signer.pubkey(),
-            std::slice::from_ref(&self.cli_config.signer),
-        )
-        .await?;
+        if self.print_tx {
+            self.print_base58_tx(&[ix]);
+        } else {
+            self.process_transaction(
+                &[ix],
+                &self.cli_config.signer.pubkey(),
+                std::slice::from_ref(&self.cli_config.signer),
+            )
+            .await?;
 
-        if !self.print_tx {
             let account = self.get_account::<Whitelist>(&whitelist_address).await?;
             log::info!("{account:?}");
         }
@@ -338,25 +373,24 @@ impl WhitelistManagementCliHandler {
         Ok(())
     }
 
-    // #[allow(dead_code)]
-    // fn print_base58_tx(&self, ixs: &[Instruction]) {
-    //     ixs.iter().for_each(|ix| {
-    //         log::info!("\n------ IX ------\n");
+    fn print_base58_tx(&self, ixs: &[Instruction]) {
+        ixs.iter().for_each(|ix| {
+            log::info!("\n------ IX ------\n");
 
-    //         println!("{}\n", ix.program_id);
+            println!("{}\n", ix.program_id);
 
-    //         ix.accounts.iter().for_each(|account| {
-    //             let pubkey = format!("{}", account.pubkey);
-    //             let writable = if account.is_writable { "W" } else { "" };
-    //             let signer = if account.is_signer { "S" } else { "" };
+            ix.accounts.iter().for_each(|account| {
+                let pubkey = format!("{}", account.pubkey);
+                let writable = if account.is_writable { "W" } else { "" };
+                let signer = if account.is_signer { "S" } else { "" };
 
-    //             println!("{:<44} {:>2} {:>1}", pubkey, writable, signer);
-    //         });
+                println!("{:<44} {:>2} {:>1}", pubkey, writable, signer);
+            });
 
-    //         println!("\n");
+            println!("\n");
 
-    //         let base58_string = bs58::encode(&ix.data).into_string();
-    //         println!("{}\n", base58_string);
-    //     });
-    // }
+            let base58_string = bs58::encode(&ix.data).into_string();
+            println!("{}\n", base58_string);
+        });
+    }
 }

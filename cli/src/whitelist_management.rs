@@ -33,6 +33,11 @@ pub enum WhitelistManagementActions {
 
     /// Add Admin
     AddAdmin {
+        /// Current admin pubkey. If omitted, defaults to the configured signer.
+        /// Pass explicitly when using --print-tx without a keypair file.
+        #[arg(long)]
+        admin: Option<Pubkey>,
+
         /// New Admin
         #[arg(long)]
         new_admin: Pubkey,
@@ -40,6 +45,11 @@ pub enum WhitelistManagementActions {
 
     /// Remove Admin
     RemoveAdmin {
+        /// Current admin pubkey. If omitted, defaults to the configured signer.
+        /// Pass explicitly when using --print-tx without a keypair file.
+        #[arg(long)]
+        admin: Option<Pubkey>,
+
         /// Admin To Remove
         #[arg(long)]
         admin_to_remove: Pubkey,
@@ -47,6 +57,11 @@ pub enum WhitelistManagementActions {
 
     /// Add To Whitelist
     AddToWhitelist {
+        /// Current admin pubkey. If omitted, defaults to the configured signer.
+        /// Pass explicitly when using --print-tx without a keypair file.
+        #[arg(long)]
+        admin: Option<Pubkey>,
+
         /// Signer To Add
         #[arg(long)]
         signer_to_add: Pubkey,
@@ -54,6 +69,11 @@ pub enum WhitelistManagementActions {
 
     /// Remove From Whitelist
     RemoveFromWhitelist {
+        /// Current admin pubkey. If omitted, defaults to the configured signer.
+        /// Pass explicitly when using --print-tx without a keypair file.
+        #[arg(long)]
+        admin: Option<Pubkey>,
+
         /// Signer To Remove
         #[arg(long)]
         signer_to_remove: Pubkey,
