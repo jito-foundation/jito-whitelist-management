@@ -1,7 +1,7 @@
 .PHONY: build-sbf clean test clippy fmt idl-build client-build
 
 build-sbf:
-	~/.cargo/bin/cargo-build-sbf --manifest-path program/Cargo.toml --arch v3
+	cargo build-sbf --manifest-path program/Cargo.toml --arch v3
 
 # IDL Build
 build-idl:
