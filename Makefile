@@ -1,7 +1,7 @@
 .PHONY: build-sbf clean test clippy fmt idl-build client-build
 
 build-sbf:
-	cargo-build-sbf --manifest-path program/Cargo.toml
+	cargo build-sbf --manifest-path program/Cargo.toml --arch v3
 
 # IDL Build
 build-idl:
@@ -22,5 +22,5 @@ build-client:
 # Test
 test:
 	make build-sbf && \
-	cp ./target/sbpf-solana-solana/release/jito_whitelist_management_program.so ./program/tests/fixtures/ && \
+	cp ./target/sbpfv3-solana-solana/release/jito_whitelist_management_program.so ./program/tests/fixtures/ && \
 	SBF_OUT_DIR=$(pwd)/target/sbpf-solana-solana/release cargo nextest run
