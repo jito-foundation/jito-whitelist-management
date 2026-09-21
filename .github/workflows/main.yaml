@@ -102,11 +102,11 @@ jobs:
           sudo apt-get install -y protobuf-compiler libudev-dev libclang-dev
 
       - name: Install solana-verify from git
-        run: cargo install solana-verify --git https://github.com/Ellipsis-Labs/solana-verifiable-build.git
+        run: cargo install solana-verify --git https://github.com/solana-foundation/solana-verifiable-build.git --tag v0.5.2 --locked
 
       # Install Agave CLI
       - name: install solana toolsuite
-        run: sh -c "$(curl -sSfL https://release.anza.xyz/v3.0.8/install)"
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/v4.3.0/install)"
 
       - name: add to path
         run: echo "/home/runner/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
