@@ -115,7 +115,7 @@ jobs:
       - run: git checkout $(git rev-parse --abbrev-ref HEAD) -- Cargo.lock
 
       - name: Run verified build
-        run: solana-verify build --library-name jito_whitelist_management_program
+        run: solana-verify build --library-name jito_whitelist_management_program --arch v3
         env:
           SVB_DOCKER_MEMORY_LIMIT: 6g
           SVB_DOCKER_CPU_LIMIT: 2
